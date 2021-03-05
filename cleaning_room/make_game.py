@@ -1,9 +1,9 @@
 CONCURRENT_GAME = False
-NUM_LOCS = 4
+NUM_LOCS = 7
 ROBOT_GRIPPER = 0
 HUMAN_GRIPPER = 1
 TERM_LOC = NUM_LOCS-1
-NUM_OBJS = 1
+NUM_OBJS = 3
 
 class Transition:
     action=""
@@ -57,7 +57,7 @@ class State:
             rturn = 0
             if self.robot_turn:
                 rturn = 1
-            str = "(rloc={}) & ".format(self.robot_loc)+"(hloc={}) & ".format(self.human_loc)+"(rturn={}) &".format(rturn)
+            str = "(rloc={}) & ".format(self.robot_loc)+"(hloc={}) & ".format(self.human_loc)+"(rturn={}) & ".format(rturn)
             for i in range(NUM_OBJS):
                 str+="(o{}={}) & ".format(i,self.obj_locs[i])
             return str[:-2]
@@ -71,7 +71,7 @@ def genNeighbors(state):
         s_prime.obj_locs=state.obj_locs.copy()
         state.neighbors = [s_prime]
         state.transitions = [Transition([(s_prime,1.0)])]
-        state.transitions[-1].action="robot-term-self-loop"
+        state.transitions[-1].action="robottermselfloop"
         s_prime.robot_turn = False
         ret.append(s_prime)
         return ret
@@ -82,13 +82,13 @@ def genNeighbors(state):
         s_prime.obj_locs=state.obj_locs.copy()
         state.neighbors = [s_prime]
         state.transitions = [Transition([(s_prime,1.0)])]
-        state.transitions[-1].action="human-term-self-loop"
+        state.transitions[-1].action="humantermselfloop"
         s_prime.robot_turn = True
         ret.append(s_prime)
         return ret
 
     #moving
-    for i in range(2,NUM_LOCS-1): 
+    for i in range(2,NUM_LOCS): 
         s_prime=State()
         already_there = False
         if state.robot_turn:
@@ -108,9 +108,15 @@ def genNeighbors(state):
         state.neighbors.append(s_prime)
         state.transitions.append(Transition([(s_prime,1)]))
         if already_there:
-            state.transitions[-1].action="no-op"
+            if state.robot_turn:
+                state.transitions[-1].action="robotnoop"
+            else:
+                state.transitions[-1].action="humannoop"
         else:
-            state.transitions[-1].action="motion"
+            if state.robot_turn:
+                state.transitions[-1].action="robotmotion"
+            else:
+                state.transitions[-1].action="humanmotion"
     
     #grasping and placing require empty/full hands
     grasped_index = -1
@@ -161,7 +167,10 @@ def genNeighbors(state):
                 ret.append(s_prime2)
                 state.neighbors.append(s_prime2)
                 state.transitions.append(Transition([(s_prime,0.9), (s_prime2,0.1)]))
-                state.transitions[-1].action="grasp"
+                if state.robot_turn:
+                    state.transitions[-1].action="robotgrasp"
+                else:
+                    state.transitions[-1].action="humangrasp"
 
     #placing   
     else:
@@ -177,8 +186,10 @@ def genNeighbors(state):
         ret.append(s_prime)
         state.neighbors.append(s_prime)
         state.transitions.append(Transition([(s_prime,1)]))
-        state.transitions[-1].action="place"
-
+        if state.robot_turn:
+            state.transitions[-1].action="robotplace"
+        else:
+            state.transitions[-1].action="humanplace"
 
     for n in ret:
         if state.robot_turn == n.robot_turn:
@@ -235,20 +246,20 @@ def print_front_matter():
         print("smg")
     
     print("player r1")
-    print("  robot")
+    print("  robot, [robotnoop], [robotmotion], [robotplace], [robotgrasp], [robottermselfloop]")
     print("endplayer")
 
     print("player h1")
-    print("  human")
+    print("  human, [humannoop], [humanmotion], [humanplace], [humangrasp], [humantermselfloop]")
     print("endplayer")
 
 def print_global_vars():
-    for i in range(NUM_OBJS):
-        print("global o{}: [0..{}] init 2;".format(i, NUM_LOCS-1))
-    if not CONCURRENT_GAME:
-        print("global rturn: [0..1] init 0;")
     print("global rloc: [2..{}] init 2;".format(NUM_LOCS-1))
     print("global hloc: [2..{}] init 2;".format(NUM_LOCS-1))
+    if not CONCURRENT_GAME:
+        print("global rturn: [0..1] init 0;")
+    for i in range(NUM_OBJS):
+        print("global o{}: [0..{}] init 2;".format(i, TERM_LOC-1))
 
 def print_robot_module(game, state_to_int_map):
     print("module robot")
@@ -275,7 +286,7 @@ def print_human_module(game, state_to_int_map):
 
 def print_labels():
     print("label \"goalterm\" = (rloc={}) & (hloc={});".format(TERM_LOC,TERM_LOC))
-    print("label \"goalcleaned\" = (o0=0);")
+    print("label \"goalcleaned\" = (o0=2);")
 
 
 
