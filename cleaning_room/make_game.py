@@ -19,12 +19,11 @@ class State:
     robot_turn=False
     obj_locs=[]
     neighbors = []
-    act_to_reach_neighbor = []
     transitions = [] # list of transitions
 
     def __init__(self):
-        self.robot_loc=0
-        self.human_loc=0
+        self.robot_loc=2
+        self.human_loc=2
         self.robot_turn=False
         self.obj_locs=[]
         self.neighbors=[]
@@ -159,17 +158,18 @@ def genNeighbors(state):
                 s_prime.robot_turn = not state.robot_turn
                 ret.append(s_prime)
                 state.neighbors.append(s_prime)
-                s_prime2=State()
-                s_prime2.robot_loc=state.robot_loc
-                s_prime2.human_loc=state.human_loc
-                s_prime2.obj_locs = state.obj_locs.copy()
-                s_prime2.robot_turn = not state.robot_turn
-                ret.append(s_prime2)
-                state.neighbors.append(s_prime2)
-                state.transitions.append(Transition([(s_prime,0.9), (s_prime2,0.1)]))
                 if state.robot_turn:
+                    s_prime2=State()
+                    s_prime2.robot_loc=state.robot_loc
+                    s_prime2.human_loc=state.human_loc
+                    s_prime2.obj_locs = state.obj_locs.copy()
+                    s_prime2.robot_turn = not state.robot_turn
+                    ret.append(s_prime2)
+                    state.neighbors.append(s_prime2)
+                    state.transitions.append(Transition([(s_prime,0.9), (s_prime2,0.1)]))
                     state.transitions[-1].action="robotgrasp"
                 else:
+                    state.transitions.append(Transition([(s_prime,1)]))
                     state.transitions[-1].action="humangrasp"
 
     #placing   
@@ -286,14 +286,17 @@ def print_human_module(game, state_to_int_map):
 
 def print_labels():
     print("label \"goalterm\" = (rloc={}) & (hloc={});".format(TERM_LOC,TERM_LOC))
-    print("label \"goalcleaned\" = (o0=2);")
+    goal_string = ""
+    for i in range(NUM_OBJS):
+        goal_string += "(o{}={}) &".format(i, i+2)
+    print("label \"goalcleaned\" = "+goal_string[:-2]+";")
 
 
 
 initial_state=State()
 initial_state.robot_loc = 2
 initial_state.human_loc = 2
-initial_state.obj_locs=[1]*NUM_OBJS
+initial_state.obj_locs=[2]*NUM_OBJS
 initial_state.robot_turn=False
 
 game = genGame(initial_state)
