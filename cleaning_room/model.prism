@@ -1,0 +1,30 @@
+smg
+player r1
+  robot
+endplayer
+player h1
+  human
+endplayer
+global o0: [0..3] init 2;
+global rturn: [0..1] init 0;
+global rloc: [2..3] init 2;
+global hloc: [2..3] init 2;
+module robot
+    [no-op] (rloc=2) & (hloc=2) & (rturn=1) &(o0=2)  ->  1: (rloc'=2) & (hloc'=2) & (rturn'=0) & (o0'=2) ;
+    [grasp] (rloc=2) & (hloc=2) & (rturn=1) &(o0=2)  ->  0.9: (rloc'=2) & (hloc'=2) & (rturn'=0) & (o0'=0)  + 0.1: (rloc'=2) & (hloc'=2) & (rturn'=0) & (o0'=2) ;
+    [no-op] (rloc=2) & (hloc=2) & (rturn=1) &(o0=1)  ->  1: (rloc'=2) & (hloc'=2) & (rturn'=0) & (o0'=1) ;
+    [no-op] (rloc=2) & (hloc=2) & (rturn=1) &(o0=0)  ->  1: (rloc'=2) & (hloc'=2) & (rturn'=0) & (o0'=0) ;
+    [place] (rloc=2) & (hloc=2) & (rturn=1) &(o0=0)  ->  1: (rloc'=2) & (hloc'=2) & (rturn'=0) & (o0'=2) ;
+    [no-op] (rloc=2) & (hloc=2) & (rturn=1) &(o0=1)  ->  1: (rloc'=2) & (hloc'=2) & (rturn'=0) & (o0'=1) ;
+endmodule
+module human
+    [no-op] (rloc=2) & (hloc=2) & (rturn=0) &(o0=1)  ->  1: (rloc'=2) & (hloc'=2) & (rturn'=1) & (o0'=1) ;
+    [place] (rloc=2) & (hloc=2) & (rturn=0) &(o0=1)  ->  1: (rloc'=2) & (hloc'=2) & (rturn'=1) & (o0'=2) ;
+    [no-op] (rloc=2) & (hloc=2) & (rturn=0) &(o0=2)  ->  1: (rloc'=2) & (hloc'=2) & (rturn'=1) & (o0'=2) ;
+    [grasp] (rloc=2) & (hloc=2) & (rturn=0) &(o0=2)  ->  0.9: (rloc'=2) & (hloc'=2) & (rturn'=1) & (o0'=1)  + 0.1: (rloc'=2) & (hloc'=2) & (rturn'=1) & (o0'=2) ;
+    [no-op] (rloc=2) & (hloc=2) & (rturn=0) &(o0=0)  ->  1: (rloc'=2) & (hloc'=2) & (rturn'=1) & (o0'=0) ;
+    [no-op] (rloc=2) & (hloc=2) & (rturn=0) &(o0=2)  ->  1: (rloc'=2) & (hloc'=2) & (rturn'=1) & (o0'=2) ;
+    [grasp] (rloc=2) & (hloc=2) & (rturn=0) &(o0=2)  ->  0.9: (rloc'=2) & (hloc'=2) & (rturn'=1) & (o0'=1)  + 0.1: (rloc'=2) & (hloc'=2) & (rturn'=1) & (o0'=2) ;
+endmodule
+label "goalterm" = (rloc=3) & (hloc=3);
+label "goalcleaned" = (o0=0);
