@@ -171,6 +171,17 @@ def genNeighbors(state):
                 else:
                     state.transitions.append(Transition([(s_prime,1)]))
                     state.transitions[-1].action="humangrasp"
+                    #allow human to continue
+                    s_prime2=State()
+                    s_prime2.robot_loc=state.robot_loc
+                    s_prime2.human_loc=state.human_loc
+                    s_prime2.obj_locs = state.obj_locs.copy()
+                    s_prime2.obj_locs[i] = HUMAN_GRIPPER
+                    s_prime2.robot_turn = state.robot_turn
+                    ret.append(s_prime2)
+                    state.neighbors.append(s_prime2)
+                    state.transitions.append(Transition([(s_prime2,1)]))
+                    state.transitions[-1].action="humangraspAndCont"
 
     #placing   
     else:
@@ -190,20 +201,33 @@ def genNeighbors(state):
             state.transitions[-1].action="robotplace"
         else:
             state.transitions[-1].action="humanplace"
+#Also allow the human to move again
+            s_prime2=State()
+            s_prime2.robot_loc=state.robot_loc
+            s_prime2.human_loc=state.human_loc
+            s_prime2.obj_locs = state.obj_locs.copy()
+            s_prime2.obj_locs[grasped_index] = state.human_loc
+            s_prime2.robot_turn = state.robot_turn
+            ret.append(s_prime2)
+            state.neighbors.append(s_prime2)
+            state.transitions.append(Transition([(s_prime2,1)]))
+            state.transitions[-1].action="humanplaceAndCont"
 
-    for n in ret:
-        if state.robot_turn == n.robot_turn:
-            print("ERROR, the turn didn't alternate=================================================================================")
 
-    for n in state.neighbors:
-        if state.robot_turn == n.robot_turn:
-            print("ERROR, the turn didn't alternate=================================================================================")
 
-    for t in state.transitions:
-        for s_prime, prob in t.prob_distr:
-            if state.robot_turn == s_prime.robot_turn:
-                print("ERROR, the turn didn't alternate=================================================================================")
-                print(len(state.transitions))
+    # for n in ret:
+    #     if state.robot_turn == n.robot_turn:
+    #         print("ERROR, the turn didn't alternate=================================================================================")
+
+    # for n in state.neighbors:
+    #     if state.robot_turn == n.robot_turn:
+    #         print("ERROR, the turn didn't alternate=================================================================================")
+
+    # for t in state.transitions:
+    #     for s_prime, prob in t.prob_distr:
+    #         if state.robot_turn == s_prime.robot_turn:
+    #             print("ERROR, the turn didn't alternate=================================================================================")
+    #             print(len(state.transitions))
 
     return ret
 
@@ -228,8 +252,8 @@ def genGame(initial_state):
         #check all neighbors and add new ones to frontier
         neighbors = genNeighbors(s)
         for n in neighbors:
-            if s.robot_turn == n.robot_turn:
-                print("ERROR, the turn didn't alternate=================================================================================")
+            # if s.robot_turn == n.robot_turn:
+            #     print("ERROR, the turn didn't alternate=================================================================================")
 
             if n.toInt() in visited_states:
                 if visited_states[n.toInt()].robot_turn != n.robot_turn or visited_states[n.toInt()].human_loc != n.human_loc or visited_states[n.toInt()].robot_loc != n.robot_loc or visited_states[n.toInt()].obj_locs[0] != n.obj_locs[0]:
@@ -291,7 +315,10 @@ def print_labels():
         goal_string += "(o{}={}) &".format(i, i+2)
     print("label \"goalcleaned\" = "+goal_string[:-2]+";")
 
-
+def print_rewards():
+    print("rewards")
+    print("    true : 1;")
+    print("endrewards")
 
 initial_state=State()
 initial_state.robot_loc = 2
@@ -314,3 +341,4 @@ print_global_vars()
 print_robot_module(game, state_to_int_map)
 print_human_module(game, state_to_int_map)
 print_labels()
+print_rewards()

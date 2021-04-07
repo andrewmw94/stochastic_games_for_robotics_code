@@ -2,5 +2,5 @@
 
 <<1>> Pmax =? [ F ("goalterm" & "goalcleaned") ]
 
-<<1>> Rmax =? [ (F "goalterm") & (F "goalcleaned") ]
+<<1>> Rmin =? [ (F "goalterm") & (F "goalcleaned") ]
 
