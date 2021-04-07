@@ -5,6 +5,8 @@ HUMAN_GRIPPER = 1
 TERM_LOC = NUM_LOCS-1
 NUM_OBJS = 1
 
+HUMAN_TERM_PROB = 0.05
+
 class Transition:
     action=""
     prob_distr = [] # list of <new state, probability>
@@ -61,6 +63,8 @@ class State:
                 str+="(o{}={}) & ".format(i,self.obj_locs[i])
             return str[:-2]
 
+
+
 def genNeighbors(state):
     ret = []
     if state.robot_turn and state.robot_loc == TERM_LOC:
@@ -79,6 +83,9 @@ def genNeighbors(state):
         s_prime.robot_loc=state.robot_loc
         s_prime.human_loc=state.human_loc
         s_prime.obj_locs=state.obj_locs.copy()
+        for i in range(len(s_prime.obj_locs)):
+            if s_prime.obj_locs[i] == HUMAN_GRIPPER:
+                s_prime.obj_locs[i] = 2
         state.neighbors = [s_prime]
         state.transitions = [Transition([(s_prime,1.0)])]
         state.transitions[-1].action="humantermselfloop"
@@ -105,15 +112,25 @@ def genNeighbors(state):
         s_prime.robot_turn = not state.robot_turn
         ret.append(s_prime)
         state.neighbors.append(s_prime)
-        state.transitions.append(Transition([(s_prime,1)]))
-        if already_there:
-            if state.robot_turn:
+
+        if state.robot_turn:
+            state.transitions.append(Transition([(s_prime,1)]))
+            if already_there:
                 state.transitions[-1].action="robotnoop"
             else:
-                state.transitions[-1].action="humannoop"
-        else:
-            if state.robot_turn:
                 state.transitions[-1].action="robotmotion"
+        else:
+            s_prime2=State()
+            s_prime2.robot_loc=state.robot_loc
+            s_prime2.human_loc=TERM_LOC
+            s_prime2.obj_locs = state.obj_locs.copy()
+            s_prime2.robot_turn = not state.robot_turn
+            ret.append(s_prime2)
+            state.neighbors.append(s_prime2)
+            state.transitions.append(Transition([(s_prime,1-HUMAN_TERM_PROB),(s_prime2,HUMAN_TERM_PROB)]))
+            # state.transitions.append(Transition([(s_prime,1-HUMAN_TERM_PROB)]))
+            if already_there:
+                state.transitions[-1].action="humannoop"
             else:
                 state.transitions[-1].action="humanmotion"
     
@@ -169,7 +186,16 @@ def genNeighbors(state):
                     state.transitions.append(Transition([(s_prime,0.9), (s_prime2,0.1)]))
                     state.transitions[-1].action="robotgrasp"
                 else:
-                    state.transitions.append(Transition([(s_prime,1)]))
+                    # state.transitions.append(Transition([(s_prime,1-HUMAN_TERM_PROB)]))
+                    # state.transitions[-1].action="humangrasp"
+                    s_prime2=State()
+                    s_prime2.robot_loc=state.robot_loc
+                    s_prime2.human_loc=TERM_LOC
+                    s_prime2.obj_locs = state.obj_locs.copy()
+                    s_prime2.robot_turn = not state.robot_turn
+                    ret.append(s_prime2)
+                    state.neighbors.append(s_prime2)
+                    state.transitions.append(Transition([(s_prime,1-HUMAN_TERM_PROB),(s_prime2,HUMAN_TERM_PROB)]))
                     state.transitions[-1].action="humangrasp"
 
     #placing   
@@ -185,11 +211,31 @@ def genNeighbors(state):
         s_prime.robot_turn = not state.robot_turn
         ret.append(s_prime)
         state.neighbors.append(s_prime)
-        state.transitions.append(Transition([(s_prime,1)]))
         if state.robot_turn:
+            state.transitions.append(Transition([(s_prime,1)]))
             state.transitions[-1].action="robotplace"
         else:
+            s_prime2=State()
+            s_prime2.robot_loc=state.robot_loc
+            s_prime2.human_loc=TERM_LOC
+            s_prime2.obj_locs = state.obj_locs.copy()
+            s_prime2.robot_turn = not state.robot_turn
+            ret.append(s_prime2)
+            state.neighbors.append(s_prime2)
+            state.transitions.append(Transition([(s_prime,1-HUMAN_TERM_PROB),(s_prime2,HUMAN_TERM_PROB)]))
+            # state.transitions.append(Transition([(s_prime,1-HUMAN_TERM_PROB)]))
             state.transitions[-1].action="humanplace"
+
+    # #At every human turn, there is a probability of human termination
+    # if not state.robot_turn:
+    #     s_prime=State()
+    #     s_prime.robot_loc=state.robot_loc
+    #     s_prime.human_loc=TERM_LOC
+    #     s_prime.obj_locs = state.obj_locs.copy()
+    #     s_prime.robot_turn = not state.robot_turn
+    #     ret.append(s_prime)
+    #     state.neighbors.append(s_prime)
+    #     state.transitions.append(Transition([(s_prime,HUMAN_TERM_PROB)]))
 
     for n in ret:
         if state.robot_turn == n.robot_turn:
@@ -291,6 +337,11 @@ def print_labels():
         goal_string += "(o{}={}) &".format(i, i+2)
     print("label \"goalcleaned\" = "+goal_string[:-2]+";")
 
+def print_rewards():
+    print("rewards")
+    print("    true : 1;")
+    print("endrewards")
+
 
 
 initial_state=State()
@@ -314,3 +365,4 @@ print_global_vars()
 print_robot_module(game, state_to_int_map)
 print_human_module(game, state_to_int_map)
 print_labels()
+print_rewards()
