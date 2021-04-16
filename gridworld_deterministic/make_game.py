@@ -1,5 +1,5 @@
 CONCURRENT_GAME = False
-GRID_SIZE = 25
+GRID_SIZE = 30
 TERM_LOC = GRID_SIZE*GRID_SIZE
 NUM_HUMANS = 1
 
@@ -68,16 +68,15 @@ def isValidLoc(loc, curr_loc, robot_turn):
                 return True
         return False
     else:
-        if loc.row >= 0 and loc.row < GRID_SIZE:
-            if loc.col >= 0 and loc.col < GRID_SIZE:
-                if curr_loc.row >= curr_loc.col and curr_loc.col >= GRID_SIZE/2 and curr_loc.row == loc.row and curr_loc.col+1 == loc.col:
-                    return True
-                if curr_loc.row >= curr_loc.col and curr_loc.col >= GRID_SIZE/2 and curr_loc.row == loc.row and curr_loc.col+1 == loc.col:
-                    return True
-                if curr_loc.row >= curr_loc.col and curr_loc.col >= GRID_SIZE/2 and curr_loc.row == loc.row and curr_loc.col+1 == loc.col:
-                    return True
-                if curr_loc.row >= curr_loc.col and curr_loc.col >= GRID_SIZE/2 and curr_loc.row == loc.row and curr_loc.col+1 == loc.col:
-                    return True
+        if loc.row >= 0 and loc.row < GRID_SIZE and loc.col >= 0 and loc.col < GRID_SIZE: #the new cell is in the grid
+            if curr_loc.row <= curr_loc.col and curr_loc.row <= GRID_SIZE-curr_loc.col and curr_loc.row == loc.row and curr_loc.col+1 == loc.col:
+                return True
+            if curr_loc.row <= curr_loc.col and curr_loc.row >= GRID_SIZE-curr_loc.col and curr_loc.row+1 == loc.row and curr_loc.col == loc.col:
+                return True
+            if curr_loc.row >= curr_loc.col and curr_loc.row >= GRID_SIZE-curr_loc.col and curr_loc.row == loc.row and curr_loc.col-1 == loc.col:
+                return True
+            if curr_loc.row >= curr_loc.col and curr_loc.row <= GRID_SIZE-curr_loc.col and curr_loc.row-1 == loc.row and curr_loc.col == loc.col:
+                return True
         return False
 
 def genNeighbors(state):
@@ -145,7 +144,7 @@ def genNeighbors(state):
             ret.append(s_prime)
     else:
         #north
-        newLoc = Location(state.robot_loc.row-1, state.robot_loc.col)
+        newLoc = Location(state.human_loc.row-1, state.human_loc.col)
         if isValidLoc(newLoc, state.human_loc, state.robot_turn):
             s_prime=State()
             s_prime.robot_loc=Location(state.robot_loc.row, state.robot_loc.col)
@@ -155,7 +154,7 @@ def genNeighbors(state):
             s_prime.robot_turn = True
             ret.append(s_prime)
         #south
-        newLoc = Location(state.robot_loc.row+1, state.robot_loc.col)
+        newLoc = Location(state.human_loc.row+1, state.human_loc.col)
         if isValidLoc(newLoc, state.human_loc, state.robot_turn):
             s_prime=State()
             s_prime.robot_loc=Location(state.robot_loc.row, state.robot_loc.col)
@@ -165,7 +164,7 @@ def genNeighbors(state):
             s_prime.robot_turn = True
             ret.append(s_prime)
         #east
-        newLoc = Location(state.robot_loc.row, state.robot_loc.col+1)
+        newLoc = Location(state.human_loc.row, state.human_loc.col+1)
         if isValidLoc(newLoc, state.human_loc, state.robot_turn):
             s_prime=State()
             s_prime.robot_loc=Location(state.robot_loc.row, state.robot_loc.col)
@@ -175,7 +174,7 @@ def genNeighbors(state):
             s_prime.robot_turn = True
             ret.append(s_prime)
         #west
-        newLoc = Location(state.robot_loc.row, state.robot_loc.col-1)
+        newLoc = Location(state.human_loc.row, state.human_loc.col-1)
         if isValidLoc(newLoc, state.human_loc, state.robot_turn):
             s_prime=State()
             s_prime.robot_loc=Location(state.robot_loc.row, state.robot_loc.col)
