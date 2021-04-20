@@ -1,5 +1,5 @@
 CONCURRENT_GAME = False
-GRID_SIZE = 30
+GRID_SIZE = 25
 TERM_LOC = GRID_SIZE*GRID_SIZE
 NUM_HUMANS = 1
 
@@ -68,14 +68,27 @@ def isValidLoc(loc, curr_loc, robot_turn):
                 return True
         return False
     else:
+        #Deal with the corners
+        if (curr_loc.row==0 and curr_loc.col==0) and curr_loc.row == loc.row and curr_loc.col+1 == loc.col:#east
+            return True
+        if (curr_loc.row==0 and curr_loc.col==GRID_SIZE-1) and curr_loc.row+1 == loc.row and curr_loc.col == loc.col:#south
+            return True
+        if (curr_loc.row==GRID_SIZE-1 and curr_loc.col==GRID_SIZE-1) and curr_loc.row == loc.row and curr_loc.col-1 == loc.col:#west
+            return True
+        if (curr_loc.row==GRID_SIZE-1 and curr_loc.col==0) and curr_loc.row-1 == loc.row and curr_loc.col == loc.col:#north
+            return True
+        if (curr_loc.row == 0 or curr_loc.row == GRID_SIZE-1) and (curr_loc.col == 0 or curr_loc.col == GRID_SIZE-1):
+            return False
+
+        #This only applies if it's not a corner
         if loc.row >= 0 and loc.row < GRID_SIZE and loc.col >= 0 and loc.col < GRID_SIZE: #the new cell is in the grid
-            if curr_loc.row <= curr_loc.col and curr_loc.row <= GRID_SIZE-curr_loc.col and curr_loc.row == loc.row and curr_loc.col+1 == loc.col:
+            if (curr_loc.row <= curr_loc.col and curr_loc.row <= GRID_SIZE-curr_loc.col-1) and curr_loc.row == loc.row and curr_loc.col+1 == loc.col:#east
                 return True
-            if curr_loc.row <= curr_loc.col and curr_loc.row >= GRID_SIZE-curr_loc.col and curr_loc.row+1 == loc.row and curr_loc.col == loc.col:
+            if (curr_loc.row <= curr_loc.col and curr_loc.row > GRID_SIZE-curr_loc.col-1) and curr_loc.row+1 == loc.row and curr_loc.col == loc.col:#south
                 return True
-            if curr_loc.row >= curr_loc.col and curr_loc.row >= GRID_SIZE-curr_loc.col and curr_loc.row == loc.row and curr_loc.col-1 == loc.col:
+            if (curr_loc.row > curr_loc.col and curr_loc.row >= GRID_SIZE-curr_loc.col-1) and curr_loc.row == loc.row and curr_loc.col-1 == loc.col:#west
                 return True
-            if curr_loc.row >= curr_loc.col and curr_loc.row <= GRID_SIZE-curr_loc.col and curr_loc.row-1 == loc.row and curr_loc.col == loc.col:
+            if (curr_loc.row > curr_loc.col and curr_loc.row < GRID_SIZE-curr_loc.col-1) and curr_loc.row-1 == loc.row and curr_loc.col == loc.col:#north
                 return True
         return False
 
