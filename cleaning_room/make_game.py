@@ -1,9 +1,9 @@
 CONCURRENT_GAME = False
-NUM_LOCS = 4
+NUM_LOCS = 8
 ROBOT_GRIPPER = 0
 HUMAN_GRIPPER = 1
 TERM_LOC = NUM_LOCS-1
-NUM_OBJS = 1
+NUM_OBJS = 3
 
 class Transition:
     action=""

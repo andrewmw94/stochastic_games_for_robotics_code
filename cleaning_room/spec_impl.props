@@ -3,3 +3,5 @@
 <<1>> Pmax =? [ F ("goalterm" & "goalcleaned") ]
 
 <<1>> Rmin =? [ (F "goalterm") & (F "goalcleaned") ]
+
+<<1>> Rmin =? [ (F("robotterm" & ! "humanterm")) | (F "goalterm") & (F "goalcleaned") ]
