@@ -2,3 +2,4 @@ cleaning_room/model.prism
 gridworld/model.prism
 cleaning_room_human_prob_term/model.prism
 cleaning_room_human_unlimited/model.prism
+*/model.prism
