@@ -363,9 +363,7 @@ def sat_goal(obj_locs):
             return False
     return True
 
-def write_tra_file(game, state_to_int_map, og_state_to_int_map, int_to_state_map, filename):
-    num_choices = 732
-    num_transitions = 1008
+def write_tra_file(game, state_to_int_map, og_state_to_int_map, int_to_state_map, num_choices, num_transitions, filename):
     with open(filename, "w") as f:
         f.write(str(len(state_to_int_map))+" "+str(num_choices)+ " "+str(num_transitions)+"\n")
         for s, i in state_to_int_map.items():
@@ -428,6 +426,8 @@ state_to_int_map={initial_state.toInt():0}
 real_state_to_int_map={initial_state:0}
 int_to_state_map={0:initial_state}
 counter = 1
+num_prism_choices = 0
+num_prism_transitions = 0
 for s in game:
     if not (s.toInt() in state_to_int_map):
         tpl = {s.toInt():counter}
@@ -435,9 +435,23 @@ for s in game:
         real_state_to_int_map.update({s:counter})
         int_to_state_map.update({counter:s})
         counter+=1
+        # for j in range(len(s.transitions)):
+        #     num_prism_choices += 1
+        #     t = s.transitions[j]
+        #     for s_prime, p in t.prob_distr:
+        #         num_prism_transitions+=1
+
 
 if(IMPORTABLE):
-    write_tra_file(game, real_state_to_int_map, state_to_int_map, int_to_state_map, "model.tra")
+    #TODO: why does this need to be here?????
+    for s, i in real_state_to_int_map.items():
+        for j in range(len(s.transitions)):
+            num_prism_choices += 1
+            t = s.transitions[j]
+            for s_prime, p in t.prob_distr:
+                num_prism_transitions+=1
+
+    write_tra_file(game, real_state_to_int_map, state_to_int_map, int_to_state_map, num_prism_choices, num_prism_transitions, "model.tra")
     write_sta_file(game, real_state_to_int_map, "model.sta")
     write_lab_file(game, real_state_to_int_map, "model.lab")
     write_pla_file(game, real_state_to_int_map, "model.pla")
