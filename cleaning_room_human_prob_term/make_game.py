@@ -1,10 +1,11 @@
 CONCURRENT_GAME = False
-NUM_LOCS = 7
+NUM_LOCS = 5
 ROBOT_GRIPPER = 0
 HUMAN_GRIPPER = 1
 TERM_LOC = NUM_LOCS-1
-NUM_OBJS = 3
+NUM_OBJS = 2
 
+IMPORTABLE = True
 HUMAN_TERM_PROB = 0.05
 
 class Transition:
@@ -63,6 +64,15 @@ class State:
                 str+="(o{}={}) & ".format(i,self.obj_locs[i])
             return str[:-2]
 
+    def toTplStr(self, primed):
+        t=0
+        if self.robot_turn:
+            t=1
+        my_str="("+str(self.robot_loc)+","+str(self.human_loc)+","+str(t)
+        for i in range(NUM_OBJS):
+            my_str=my_str+","+str(self.obj_locs[i])
+        my_str = my_str+")"
+        return my_str
 
 
 def genNeighbors(state):
@@ -120,19 +130,24 @@ def genNeighbors(state):
             else:
                 state.transitions[-1].action="robotmotion"
         else:
-            s_prime2=State()
-            s_prime2.robot_loc=state.robot_loc
-            s_prime2.human_loc=TERM_LOC
-            s_prime2.obj_locs = state.obj_locs.copy()
-            s_prime2.robot_turn = not state.robot_turn
-            ret.append(s_prime2)
-            state.neighbors.append(s_prime2)
-            state.transitions.append(Transition([(s_prime,1-HUMAN_TERM_PROB),(s_prime2,HUMAN_TERM_PROB)]))
-            # state.transitions.append(Transition([(s_prime,1-HUMAN_TERM_PROB)]))
-            if already_there:
-                state.transitions[-1].action="humannoop"
+            #don't create two transitions to human term:
+            if s_prime.human_loc==TERM_LOC:
+                state.transitions.append(Transition([(s_prime,1)]))
+                state.transitions[-1].action="humanchooseterm"
             else:
-                state.transitions[-1].action="humanmotion"
+                s_prime2=State()
+                s_prime2.robot_loc=state.robot_loc
+                s_prime2.human_loc=TERM_LOC
+                s_prime2.obj_locs = state.obj_locs.copy()
+                s_prime2.robot_turn = not state.robot_turn
+                ret.append(s_prime2)
+                state.neighbors.append(s_prime2)
+                state.transitions.append(Transition([(s_prime,1-HUMAN_TERM_PROB),(s_prime2,HUMAN_TERM_PROB)]))
+                # state.transitions.append(Transition([(s_prime,1-HUMAN_TERM_PROB)]))
+                if already_there:
+                    state.transitions[-1].action="humannoop"
+                else:
+                    state.transitions[-1].action="humanmotion"
     
     #grasping and placing require empty/full hands
     grasped_index = -1
@@ -342,6 +357,63 @@ def print_rewards():
     print("    true : 1;")
     print("endrewards")
 
+def sat_goal(obj_locs):
+    for i in range(NUM_OBJS):
+        if obj_locs[i] != i+2:
+            return False
+    return True
+
+def write_tra_file(game, state_to_int_map, og_state_to_int_map, int_to_state_map, filename):
+    num_choices = 732
+    num_transitions = 1008
+    with open(filename, "w") as f:
+        f.write(str(len(state_to_int_map))+" "+str(num_choices)+ " "+str(num_transitions)+"\n")
+        for s, i in state_to_int_map.items():
+            for j in range(len(s.transitions)):
+                t = s.transitions[j]
+                for s_prime, p in t.prob_distr:
+                    f.write(str(i) + " " + str(j) + " " + (str(og_state_to_int_map[s_prime.toInt()]) + " " + str(p) + " "+t.action+"\n"))
+
+def write_sta_file(game, state_to_int_map, filename):
+    with open(filename, "w") as f:
+        my_str = ""
+        for i in range(NUM_OBJS):
+            my_str=my_str+",o"+str(i)
+        f.write("(rloc,hloc,rturn"+my_str+")\n")
+        for s, i in state_to_int_map.items():
+            f.write(str(i)+":"+s.toTplStr(False)+"\n")
+
+def write_lab_file(game, state_to_int_map, filename):
+    with open(filename, "w") as f:
+        f.write("0=\"init\" 1=\"deadlock\" 2=\"goalterm\" 3=\"goalcleaned\"\n")
+        for s, i in state_to_int_map.items():
+            my_str = ""
+            if i == 0:
+                my_str=my_str+" 0"
+            if len(s.transitions) == 0:
+                my_str=my_str+" 1"
+            if s.robot_loc == TERM_LOC and s.human_loc == TERM_LOC:
+                my_str=my_str+" 2"
+            if sat_goal(s.obj_locs):
+                my_str=my_str+" 3"
+            if len(my_str) > 0:
+                f.write(str(i)+":"+my_str+"\n")
+
+
+def write_pla_file(game, state_to_int_map, filename):
+    with open(filename, "w") as f:
+        f.write(str(len(state_to_int_map))+"\n")
+        for s, i in state_to_int_map.items():
+            p = 1
+            if not s.robot_turn:
+                p = 2
+            f.write(str(i)+":"+str(p)+"\n")
+
+def write_rew_file(game, state_to_int_map, filename):
+    with open(filename, "w") as f:
+        f.write(str(len(state_to_int_map))+" "+str(len(state_to_int_map))+"\n")
+        for s, i in state_to_int_map.items():
+            f.write(str(i)+" 1\n")
 
 
 initial_state=State()
@@ -353,16 +425,27 @@ initial_state.robot_turn=False
 game = genGame(initial_state)
 
 state_to_int_map={initial_state.toInt():0}
+real_state_to_int_map={initial_state:0}
+int_to_state_map={0:initial_state}
 counter = 1
 for s in game:
     if not (s.toInt() in state_to_int_map):
         tpl = {s.toInt():counter}
         state_to_int_map.update(tpl)
+        real_state_to_int_map.update({s:counter})
+        int_to_state_map.update({counter:s})
         counter+=1
 
-print_front_matter()
-print_global_vars()
-print_robot_module(game, state_to_int_map)
-print_human_module(game, state_to_int_map)
-print_labels()
-print_rewards()
+if(IMPORTABLE):
+    write_tra_file(game, real_state_to_int_map, state_to_int_map, int_to_state_map, "model.tra")
+    write_sta_file(game, real_state_to_int_map, "model.sta")
+    write_lab_file(game, real_state_to_int_map, "model.lab")
+    write_pla_file(game, real_state_to_int_map, "model.pla")
+    write_rew_file(game, real_state_to_int_map, "model.rew")
+else:
+    print_front_matter()
+    print_global_vars()
+    print_robot_module(game, state_to_int_map)
+    print_human_module(game, state_to_int_map)
+    print_labels()
+    print_rewards()

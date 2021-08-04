@@ -320,10 +320,8 @@ def write_tra_file(game, state_to_int_map, og_state_to_int_map, int_to_state_map
         for s, i in state_to_int_map.items():
             for j in range(len(s.transitions)):
                 t = s.transitions[j]
-                my_str = str(j)+" "
                 for s_prime, p in t.prob_distr:
-                    my_str = my_str+(str(og_state_to_int_map[s_prime.toInt()]) + " " + str(p) + " ")
-                f.write(str(i)+" "+my_str+""+t.action+"\n")
+                    f.write(str(i) + " " + str(j) + " " + (str(og_state_to_int_map[s_prime.toInt()]) + " " + str(p) + " "+t.action+"\n"))
 
 def write_sta_file(game, state_to_int_map, filename):
     with open(filename, "w") as f:
