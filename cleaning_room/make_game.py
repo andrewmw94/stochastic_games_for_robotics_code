@@ -298,6 +298,8 @@ def print_human_module(game, state_to_int_map):
 
 def print_labels():
     print("label \"goalterm\" = (rloc={}) & (hloc={});".format(TERM_LOC,TERM_LOC))
+    print("label \"robotterm\" = (rloc={});".format(TERM_LOC))
+    print("label \"humanterm\" = (hloc={});".format(TERM_LOC))
     goal_string = ""
     for i in range(NUM_OBJS):
         goal_string += "(o{}={}) &".format(i, i+2)
@@ -314,9 +316,9 @@ def sat_goal(obj_locs):
             return False
     return True
 
-def write_tra_file(game, state_to_int_map, og_state_to_int_map, int_to_state_map, filename):
+def write_tra_file(game, state_to_int_map, og_state_to_int_map, int_to_state_map, num_choices, num_transitions, filename):
     with open(filename, "w") as f:
-        f.write(str(len(state_to_int_map))+" "+"732 768\n")
+        f.write(str(len(state_to_int_map))+" "+str(num_choices)+ " "+str(num_transitions)+"\n")
         for s, i in state_to_int_map.items():
             for j in range(len(s.transitions)):
                 t = s.transitions[j]
@@ -334,7 +336,7 @@ def write_sta_file(game, state_to_int_map, filename):
 
 def write_lab_file(game, state_to_int_map, filename):
     with open(filename, "w") as f:
-        f.write("0=\"init\" 1=\"deadlock\" 2=\"goalterm\" 3=\"goalcleaned\"\n")
+        f.write("0=\"init\" 1=\"deadlock\" 2=\"goalterm\" 3=\"robotterm\" 4=\"humanterm\" 5=\"goalcleaned\"\n")
         for s, i in state_to_int_map.items():
             my_str = ""
             if i == 0:
@@ -343,8 +345,12 @@ def write_lab_file(game, state_to_int_map, filename):
                 my_str=my_str+" 1"
             if s.robot_loc == TERM_LOC and s.human_loc == TERM_LOC:
                 my_str=my_str+" 2"
-            if sat_goal(s.obj_locs):
+            if s.robot_loc == TERM_LOC:
                 my_str=my_str+" 3"
+            if s.human_loc == TERM_LOC:
+                my_str=my_str+" 4"
+            if sat_goal(s.obj_locs):
+                my_str=my_str+" 5"
             if len(my_str) > 0:
                 f.write(str(i)+":"+my_str+"\n")
 
@@ -364,6 +370,7 @@ def write_rew_file(game, state_to_int_map, filename):
         for s, i in state_to_int_map.items():
             f.write(str(i)+" 1\n")
 
+
 initial_state=State()
 initial_state.robot_loc = 2
 initial_state.human_loc = 2
@@ -376,6 +383,8 @@ state_to_int_map={initial_state.toInt():0}
 real_state_to_int_map={initial_state:0}
 int_to_state_map={0:initial_state}
 counter = 1
+num_prism_choices = 0
+num_prism_transitions = 0
 for s in game:
     if not (s.toInt() in state_to_int_map):
         tpl = {s.toInt():counter}
@@ -386,7 +395,15 @@ for s in game:
 
 
 if(IMPORTABLE):
-    write_tra_file(game, real_state_to_int_map, state_to_int_map, int_to_state_map, "model.tra")
+    #TODO: why does this need to be here?????
+    for s, i in real_state_to_int_map.items():
+        for j in range(len(s.transitions)):
+            num_prism_choices += 1
+            t = s.transitions[j]
+            for s_prime, p in t.prob_distr:
+                num_prism_transitions+=1
+
+    write_tra_file(game, real_state_to_int_map, state_to_int_map, int_to_state_map, num_prism_choices, num_prism_transitions, "model.tra")
     write_sta_file(game, real_state_to_int_map, "model.sta")
     write_lab_file(game, real_state_to_int_map, "model.lab")
     write_pla_file(game, real_state_to_int_map, "model.pla")

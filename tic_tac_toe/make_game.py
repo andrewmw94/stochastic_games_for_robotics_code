@@ -7,8 +7,8 @@ NUM_ROWS = 3
 IMPORTABLE = False
 HUMAN_TERM_PROB = 0.05
 
-ROBOT_PROB_NEIGHBOR_CELL = 0.0
-HUMAN_PROB_NEIGHBOR_CELL = 0.0
+ROBOT_PROB_NEIGHBOR_CELL = 0.05
+HUMAN_PROB_NEIGHBOR_CELL = 0.05
 
 EMPTY_CELL = 0
 ROBOT_MARKER = 1
@@ -136,11 +136,11 @@ def get_neighbor_cells(state, index):
     ret = []
     if r > 0:
         ret.append(r_c_to_index(r-1, c))
-    elif r < NUM_ROWS-1:
+    if r < NUM_ROWS-1:
         ret.append(r_c_to_index(r+1, c))
     if c > 0:
         ret.append(r_c_to_index(r, c-1))
-    elif c < NUM_ROWS-1:
+    if c < NUM_ROWS-1:
         ret.append(r_c_to_index(r, c+1))
 
     filtered_ret = []
@@ -372,6 +372,8 @@ def write_rew_file(game, state_to_int_map, filename):
 initial_state = State()
 initial_state.cells = [0]*NUM_CELLS
 initial_state.robot_turn = True
+# initial_state.cells = [2,0,1,1,1,0,2,0,0]
+# initial_state.robot_turn = False
 
 game = genGame(initial_state)
 
