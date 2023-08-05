@@ -111,4 +111,17 @@ If you get the followin error `java.lang.OutOfMemory` then use this command to p
 Note: Make sure you are in the same folder as the `model.prism` file created above. For more troubleshooting and memory related issues check this [Link](https://www.prismmodelchecker.org/manual/ConfiguringPRISM/OtherOptions)
 
 
+## Directories
+
+* cleaning_room_human_prob_term = Model where at each state there is non-zero probability of human terminating. 
+* cleaning_room_human_unlimited = Model where the ratio of robot to human action is fixed. (There is no bound on human actions)
+* tic tac toe = The classic game with trembling hand (for stochasticity)
+
+
+All the other repositories are experimental
+
+Driving = Borrowed from chen et al. See README in that directory.
+Gridworld = Testing scenarios to determin the cause of bottleneck in PRISM  
+
+
 
