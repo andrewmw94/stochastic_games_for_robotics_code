@@ -1,11 +1,13 @@
 ### Build Prism and Prism Games
-FROM ubuntu:18.04
+FROM ubuntu:22.04
+
+ARG DEBIAN_FRONTEND=noninteractive 
 
 # Update and install necessary tools (vim is just an option)
 RUN apt-get -y update
 RUN apt -y install make gcc g++ git wget vim
-RUN apt -y install python
-RUN apt -y install python3-pip
+# RUN apt -y install python
+RUN apt -y install python3-pip build-essential
 
 # Install Default JAVA for building prism
 RUN apt -y install default-jdk
@@ -22,7 +24,7 @@ RUN wget http://www.bugseng.com/products/ppl/download/ftp/releases/1.2/ppl-1.2.t
     && make -j 4 \
     && make -j 4 install
 
-# Build prism-game
+# Build prism-games
 RUN git clone https://github.com/prismmodelchecker/prism-games.git \
     && cd prism-games/prism \
     && make -j 4 PPL_DIR=/usr/local/lib
@@ -40,5 +42,9 @@ RUN ln -s /prism/prism/bin/xprism /usr/local/bin/xprism
 
 # Build Python model to construct PRISM SG abstraction
 RUN git clone https://github.com/andrewmw94/stochastic_games_for_robotics_code.git
+
+WORKDIR /stochastic_games_for_robotics_code
+
+ADD ../ ./
 
 ENTRYPOINT "/bin/bash"
