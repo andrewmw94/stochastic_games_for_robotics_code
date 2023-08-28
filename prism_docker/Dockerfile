@@ -29,6 +29,12 @@ RUN git clone https://github.com/prismmodelchecker/prism-games.git \
     && cd prism-games/prism \
     && make -j 4 PPL_DIR=/usr/local/lib
 
+
+# Build Andrew's Modified PRISM-games
+RUN  git clone https://github.com/andrewmw94/prism-games.git andrew-prism-games \
+    && cd andrew-prism-games/prism \
+    && make -j 4 PPL_DIR=/usr/local/lib
+
 # BUild prism
 RUN git clone https://github.com/prismmodelchecker/prism.git \
     && cd prism/prism \
