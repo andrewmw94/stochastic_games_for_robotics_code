@@ -35,6 +35,10 @@ RUN  git clone https://github.com/andrewmw94/prism-games.git andrew-prism-games 
     && cd andrew-prism-games/prism \
     && make -j 4 PPL_DIR=/usr/local/lib
 
+
+# Add PRISM Benchmarks to the docker file
+RUN git clone https://github.com/prismmodelchecker/prism-benchmarks.git
+
 # BUild prism
 RUN git clone https://github.com/prismmodelchecker/prism.git \
     && cd prism/prism \
