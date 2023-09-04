@@ -3,3 +3,11 @@ gridworld/model.prism
 cleaning_room_human_prob_term/model.prism
 cleaning_room_human_unlimited/model.prism
 */model.prism
+
+# ignore big model files - IN future use Git Large File Storage (LFS)
+cleaning_room_human_prob_term/models/3_obj_envs/3_obj_12/
+cleaning_room_human_prob_term/models/4_obj_envs/4_obj_9/
+cleaning_room_human_prob_term/models/5_obj_envs/
+
+# ignore my benchmarking dump yard
+preliminary_benchmarking_results/
