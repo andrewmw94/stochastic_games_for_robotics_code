@@ -1,0 +1,4 @@
+<<1>> Pmax =? [ F ("goalcleaned") ]
+<<1>> Pmax =? [ G (!("humanterm")) | (F ("goalcleaned")) ]
+<<1>> Rmin =? [ F ("goalcleaned") ]
+<<1>> Rmin =? [ G (("humanterm")) | (F ("goalcleaned")) ]

@@ -1,0 +1,67 @@
+smg
+player r1
+  robot, [robotnoop], [robotmotion], [robotplace], [robotgrasp], [robottermselfloop]
+endplayer
+player h1
+  human, [humannoop], [humanmotion], [humanplace], [humangrasp], [humantermselfloop]
+endplayer
+global rloc: [2..3] init 2;
+global hloc: [2..3] init 2;
+global rturn: [0..1] init 0;
+global o0: [0..2] init 2;
+module robot
+    [robotnoop] (rloc=2) & (hloc=2) & (rturn=1) & (o0=1)  ->  1: (rloc'=2) & (hloc'=2) & (rturn'=0) & (o0'=1) ;
+    [robotmotion] (rloc=2) & (hloc=2) & (rturn=1) & (o0=1)  ->  1: (rloc'=3) & (hloc'=2) & (rturn'=0) & (o0'=1) ;
+    [robottermselfloop] (rloc=3) & (hloc=2) & (rturn=1) & (o0=2)  ->  1.0: (rloc'=3) & (hloc'=2) & (rturn'=0) & (o0'=2) ;
+    [robottermselfloop] (rloc=3) & (hloc=2) & (rturn=1) & (o0=1)  ->  1.0: (rloc'=3) & (hloc'=2) & (rturn'=0) & (o0'=1) ;
+    [robottermselfloop] (rloc=3) & (hloc=3) & (rturn=1) & (o0=2)  ->  1.0: (rloc'=3) & (hloc'=3) & (rturn'=0) & (o0'=2) ;
+    [robottermselfloop] (rloc=3) & (hloc=2) & (rturn=1) & (o0=1)  ->  1.0: (rloc'=3) & (hloc'=2) & (rturn'=0) & (o0'=1) ;
+    [robotnoop] (rloc=2) & (hloc=2) & (rturn=1) & (o0=2)  ->  1: (rloc'=2) & (hloc'=2) & (rturn'=0) & (o0'=2) ;
+    [robotmotion] (rloc=2) & (hloc=2) & (rturn=1) & (o0=2)  ->  1: (rloc'=3) & (hloc'=2) & (rturn'=0) & (o0'=2) ;
+    [robotgrasp] (rloc=2) & (hloc=2) & (rturn=1) & (o0=2)  ->  0.9: (rloc'=2) & (hloc'=2) & (rturn'=0) & (o0'=0)  + 0.1: (rloc'=2) & (hloc'=2) & (rturn'=0) & (o0'=2) ;
+    [robotnoop] (rloc=2) & (hloc=3) & (rturn=1) & (o0=0)  ->  1: (rloc'=2) & (hloc'=3) & (rturn'=0) & (o0'=0) ;
+    [robotmotion] (rloc=2) & (hloc=3) & (rturn=1) & (o0=0)  ->  1: (rloc'=3) & (hloc'=3) & (rturn'=0) & (o0'=0) ;
+    [robotplace] (rloc=2) & (hloc=3) & (rturn=1) & (o0=0)  ->  1: (rloc'=2) & (hloc'=3) & (rturn'=0) & (o0'=2) ;
+    [robotnoop] (rloc=2) & (hloc=3) & (rturn=1) & (o0=2)  ->  1: (rloc'=2) & (hloc'=3) & (rturn'=0) & (o0'=2) ;
+    [robotmotion] (rloc=2) & (hloc=3) & (rturn=1) & (o0=2)  ->  1: (rloc'=3) & (hloc'=3) & (rturn'=0) & (o0'=2) ;
+    [robotgrasp] (rloc=2) & (hloc=3) & (rturn=1) & (o0=2)  ->  0.9: (rloc'=2) & (hloc'=3) & (rturn'=0) & (o0'=0)  + 0.1: (rloc'=2) & (hloc'=3) & (rturn'=0) & (o0'=2) ;
+    [robottermselfloop] (rloc=3) & (hloc=3) & (rturn=1) & (o0=0)  ->  1.0: (rloc'=3) & (hloc'=3) & (rturn'=0) & (o0'=0) ;
+    [robotnoop] (rloc=2) & (hloc=2) & (rturn=1) & (o0=0)  ->  1: (rloc'=2) & (hloc'=2) & (rturn'=0) & (o0'=0) ;
+    [robotmotion] (rloc=2) & (hloc=2) & (rturn=1) & (o0=0)  ->  1: (rloc'=3) & (hloc'=2) & (rturn'=0) & (o0'=0) ;
+    [robotplace] (rloc=2) & (hloc=2) & (rturn=1) & (o0=0)  ->  1: (rloc'=2) & (hloc'=2) & (rturn'=0) & (o0'=2) ;
+    [robottermselfloop] (rloc=3) & (hloc=2) & (rturn=1) & (o0=0)  ->  1.0: (rloc'=3) & (hloc'=2) & (rturn'=0) & (o0'=0) ;
+    [robotnoop] (rloc=2) & (hloc=3) & (rturn=1) & (o0=2)  ->  1: (rloc'=2) & (hloc'=3) & (rturn'=0) & (o0'=2) ;
+    [robotmotion] (rloc=2) & (hloc=3) & (rturn=1) & (o0=2)  ->  1: (rloc'=3) & (hloc'=3) & (rturn'=0) & (o0'=2) ;
+    [robotgrasp] (rloc=2) & (hloc=3) & (rturn=1) & (o0=2)  ->  0.9: (rloc'=2) & (hloc'=3) & (rturn'=0) & (o0'=0)  + 0.1: (rloc'=2) & (hloc'=3) & (rturn'=0) & (o0'=2) ;
+    [robotnoop] (rloc=2) & (hloc=2) & (rturn=1) & (o0=2)  ->  1: (rloc'=2) & (hloc'=2) & (rturn'=0) & (o0'=2) ;
+    [robotmotion] (rloc=2) & (hloc=2) & (rturn=1) & (o0=2)  ->  1: (rloc'=3) & (hloc'=2) & (rturn'=0) & (o0'=2) ;
+    [robotgrasp] (rloc=2) & (hloc=2) & (rturn=1) & (o0=2)  ->  0.9: (rloc'=2) & (hloc'=2) & (rturn'=0) & (o0'=0)  + 0.1: (rloc'=2) & (hloc'=2) & (rturn'=0) & (o0'=2) ;
+endmodule
+module human
+    [humannoop] (rloc=2) & (hloc=2) & (rturn=0) & (o0=2)  ->  1: (rloc'=2) & (hloc'=2) & (rturn'=1) & (o0'=2) ;
+    [humanmotion] (rloc=2) & (hloc=2) & (rturn=0) & (o0=2)  ->  1: (rloc'=2) & (hloc'=3) & (rturn'=1) & (o0'=2) ;
+    [humangrasp] (rloc=2) & (hloc=2) & (rturn=0) & (o0=2)  ->  1: (rloc'=2) & (hloc'=2) & (rturn'=1) & (o0'=1) ;
+    [humannoop] (rloc=3) & (hloc=2) & (rturn=0) & (o0=1)  ->  1: (rloc'=3) & (hloc'=2) & (rturn'=1) & (o0'=1) ;
+    [humanplace] (rloc=3) & (hloc=2) & (rturn=0) & (o0=1)  ->  1: (rloc'=3) & (hloc'=2) & (rturn'=1) & (o0'=2) ;
+    [humannoop] (rloc=3) & (hloc=2) & (rturn=0) & (o0=2)  ->  1: (rloc'=3) & (hloc'=2) & (rturn'=1) & (o0'=2) ;
+    [humanmotion] (rloc=3) & (hloc=2) & (rturn=0) & (o0=2)  ->  1: (rloc'=3) & (hloc'=3) & (rturn'=1) & (o0'=2) ;
+    [humangrasp] (rloc=3) & (hloc=2) & (rturn=0) & (o0=2)  ->  1: (rloc'=3) & (hloc'=2) & (rturn'=1) & (o0'=1) ;
+    [humantermselfloop] (rloc=3) & (hloc=3) & (rturn=0) & (o0=2)  ->  1.0: (rloc'=3) & (hloc'=3) & (rturn'=1) & (o0'=2) ;
+    [humannoop] (rloc=2) & (hloc=2) & (rturn=0) & (o0=1)  ->  1: (rloc'=2) & (hloc'=2) & (rturn'=1) & (o0'=1) ;
+    [humanplace] (rloc=2) & (hloc=2) & (rturn=0) & (o0=1)  ->  1: (rloc'=2) & (hloc'=2) & (rturn'=1) & (o0'=2) ;
+    [humannoop] (rloc=2) & (hloc=2) & (rturn=0) & (o0=0)  ->  1: (rloc'=2) & (hloc'=2) & (rturn'=1) & (o0'=0) ;
+    [humanmotion] (rloc=2) & (hloc=2) & (rturn=0) & (o0=0)  ->  1: (rloc'=2) & (hloc'=3) & (rturn'=1) & (o0'=0) ;
+    [humantermselfloop] (rloc=2) & (hloc=3) & (rturn=0) & (o0=2)  ->  1.0: (rloc'=2) & (hloc'=3) & (rturn'=1) & (o0'=2) ;
+    [humantermselfloop] (rloc=2) & (hloc=3) & (rturn=0) & (o0=0)  ->  1.0: (rloc'=2) & (hloc'=3) & (rturn'=1) & (o0'=0) ;
+    [humantermselfloop] (rloc=3) & (hloc=3) & (rturn=0) & (o0=0)  ->  1.0: (rloc'=3) & (hloc'=3) & (rturn'=1) & (o0'=0) ;
+    [humantermselfloop] (rloc=2) & (hloc=3) & (rturn=0) & (o0=0)  ->  1.0: (rloc'=2) & (hloc'=3) & (rturn'=1) & (o0'=0) ;
+    [humannoop] (rloc=3) & (hloc=2) & (rturn=0) & (o0=0)  ->  1: (rloc'=3) & (hloc'=2) & (rturn'=1) & (o0'=0) ;
+    [humanmotion] (rloc=3) & (hloc=2) & (rturn=0) & (o0=0)  ->  1: (rloc'=3) & (hloc'=3) & (rturn'=1) & (o0'=0) ;
+endmodule
+label "goalterm" = (rloc=3) & (hloc=3);
+label "robotterm" = (rloc=3);
+label "humanterm" = (hloc=3);
+label "goalcleaned" = (o0=2);
+rewards
+    true : 1;
+endrewards
