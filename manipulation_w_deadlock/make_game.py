@@ -5,18 +5,17 @@ NUM_LOCS = 5
 ROBOT_GRIPPER = 0
 HUMAN_GRIPPER = 1
 TERM_LOC = NUM_LOCS-1
-NUM_OBJS = 2
+NUM_OBJS = 1
 
-# The first 4 objects are small boxes and
-SMALL_OBJ = 2
-# The next three are tall objects
-TALL_OBJ = 1
+# The first |SMALL_OBJ| objects are small boxes and the rest a re normal (tall) objects
+SMALL_OBJ = 1
+
 
 IMPORTABLE = False
 # HUMAN_TERM_PROB = 0.05  # Probaibility of human intervening
 ROBOT_FAIL_PROB = 0.05  # 5% probaility of failing 
-
 HUMAN_TERM_PROB = 0.05
+
 
 class HumanIntProb(Enum):
     # Locs l2, l3, l4, l5 - Human Near region
@@ -144,44 +143,47 @@ def genNeighbors(state):
             s_prime.human_loc=i
         
         s_prime.obj_locs = state.obj_locs.copy()
+        # if state.obj_locs[1] == 0:
+        #     a = 'Tall  object in robot gripper'
         s_prime.robot_turn = not state.robot_turn
         ret.append(s_prime)
         state.neighbors.append(s_prime)
 
-        obj_at_i: bool = True
-
         if state.robot_turn:
-            # state.transitions.append(Transition([(s_prime, 1)]))
             if already_there:
                 state.transitions.append(Transition([(s_prime, 1)]))
                 state.transitions[-1].action="robotnoop"
-                
+            # add non-zero probaility of robot going to terinal state    
             else:
-                # add non-zero probaility of robot going to terinal state
                 # if it is already already going to temrinal state
                 if i == TERM_LOC:
                     state.transitions.append(Transition([(s_prime, 1)]))
                 else:
-                    # object locs is a list of objects and their locs
-                    # if object is small box
-                    if i not in s_prime.obj_locs:
-                        obj_at_i = not obj_at_i
-
-                    if obj_at_i and s_prime.obj_locs.index(i) < SMALL_OBJ:
-                        # add trnasition to terminal state
+                    # if there is a small object in hand then add transition to terminal state
+                    if (0 in s_prime.obj_locs and s_prime.obj_locs.index(0) < SMALL_OBJ):
                         s_prime2 = State()
                         s_prime2.robot_loc = TERM_LOC
                         s_prime2.human_loc = state.human_loc
                         s_prime2.obj_locs = state.obj_locs.copy()
                         s_prime2.robot_turn = not state.robot_turn
                         state.transitions.append(Transition([(s_prime, 1- ROBOT_FAIL_PROB), (s_prime2, ROBOT_FAIL_PROB)]))
+
+                    # if hand is empty and moving to small box then add transition to terminal state
+                    elif (0 not in s_prime.obj_locs and (i in s_prime.obj_locs and s_prime.obj_locs.index(i) < SMALL_OBJ)):
+                        s_prime2 = State()
+                        s_prime2.robot_loc = TERM_LOC
+                        s_prime2.human_loc = state.human_loc
+                        s_prime2.obj_locs = state.obj_locs.copy()
+                        s_prime2.robot_turn = not state.robot_turn
+                        state.transitions.append(Transition([(s_prime, 1- ROBOT_FAIL_PROB), (s_prime2, ROBOT_FAIL_PROB)]))
+                    
                     else:
                         state.transitions.append(Transition([(s_prime, 1)]))
                 state.transitions[-1].action="robotmotion"
 
                     
         else:
-            #don't create two transitions to human term:
+            # don't create two transitions to human term:
             if s_prime.human_loc==TERM_LOC:
                 state.transitions.append(Transition([(s_prime,1)]))
                 state.transitions[-1].action="humanchooseterm"
