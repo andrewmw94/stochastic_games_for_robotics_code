@@ -129,6 +129,10 @@ def genNeighbors(state):
 
     # moving
     for i in range(2,NUM_LOCS): 
+        # Skip the terminal transition if the human is holding an object
+        if i == TERM_LOC and (not state.robot_turn) and any(ol == HUMAN_GRIPPER for ol in state.obj_locs):
+            continue
+
         s_prime=State()
         already_there = False
         if state.robot_turn:
@@ -143,8 +147,6 @@ def genNeighbors(state):
             s_prime.human_loc=i
         
         s_prime.obj_locs = state.obj_locs.copy()
-        # if state.obj_locs[1] == 0:
-        #     a = 'Tall  object in robot gripper'
         s_prime.robot_turn = not state.robot_turn
         ret.append(s_prime)
         state.neighbors.append(s_prime)
@@ -185,7 +187,7 @@ def genNeighbors(state):
         else:
             # don't create two transitions to human term:
             if s_prime.human_loc==TERM_LOC:
-                state.transitions.append(Transition([(s_prime,1)]))
+                state.transitions.append(Transition([(s_prime, 1)]))
                 state.transitions[-1].action="humanchooseterm"
             else:
                 s_prime2=State()
@@ -195,7 +197,7 @@ def genNeighbors(state):
                 s_prime2.robot_turn = not state.robot_turn
                 ret.append(s_prime2)
                 state.neighbors.append(s_prime2)
-                state.transitions.append(Transition([(s_prime,1-HUMAN_TERM_PROB),(s_prime2,HUMAN_TERM_PROB)]))
+                state.transitions.append(Transition([(s_prime,1 - HUMAN_TERM_PROB),(s_prime2, HUMAN_TERM_PROB)]))
                 # state.transitions.append(Transition([(s_prime,1-HUMAN_TERM_PROB)]))
                 if already_there:
                     state.transitions[-1].action="humannoop"
