@@ -112,6 +112,7 @@ def genNeighbors(state):
         s_prime.robot_turn = False
         ret.append(s_prime)
         return ret
+    # if human in termnial state and object in human hand then return it
     elif not state.robot_turn and state.human_loc == TERM_LOC:
         s_prime=State()
         s_prime.robot_loc=state.robot_loc
@@ -168,6 +169,8 @@ def genNeighbors(state):
                         s_prime2.human_loc = state.human_loc
                         s_prime2.obj_locs = state.obj_locs.copy()
                         s_prime2.robot_turn = not state.robot_turn
+                        ret.append(s_prime2)
+                        state.neighbours.append(s_prime2)
                         state.transitions.append(Transition([(s_prime, 1- ROBOT_FAIL_PROB), (s_prime2, ROBOT_FAIL_PROB)]))
 
                     # if hand is empty and moving to small box then add transition to terminal state
@@ -177,6 +180,8 @@ def genNeighbors(state):
                         s_prime2.human_loc = state.human_loc
                         s_prime2.obj_locs = state.obj_locs.copy()
                         s_prime2.robot_turn = not state.robot_turn
+                        ret.append(s_prime2)
+                        state.neighbours.append(s_prime2)
                         state.transitions.append(Transition([(s_prime, 1- ROBOT_FAIL_PROB), (s_prime2, ROBOT_FAIL_PROB)]))
                     
                     else:
@@ -265,7 +270,7 @@ def genNeighbors(state):
                     s_prime2.robot_turn = not state.robot_turn
                     ret.append(s_prime2)
                     state.neighbors.append(s_prime2)
-                    state.transitions.append(Transition([(s_prime,1-HUMAN_TERM_PROB),(s_prime2,HUMAN_TERM_PROB)]))
+                    state.transitions.append(Transition([(s_prime,1 - HUMAN_TERM_PROB),(s_prime2, HUMAN_TERM_PROB)]))
                     state.transitions[-1].action="humangrasp"
 
     # placing   
