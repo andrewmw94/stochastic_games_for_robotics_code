@@ -496,14 +496,14 @@ initial_state.robot_loc = 2
 initial_state.human_loc = 2
 # initial_state.obj_locs=[2]*NUM_OBJS
 initial_state.obj_locs=[2, 3]
-initial_state.robot_turn=False
+initial_state.robot_turn = True
 
 
 def print_global_vars():
     print("global rloc: [2..{}] init 2;".format(NUM_LOCS-1))
     print("global hloc: [2..{}] init 2;".format(NUM_LOCS-1))
     if not CONCURRENT_GAME:
-        print("global rturn: [0..1] init 1;")
+        print(f"global rturn: [0..1] init {1 if initial_state.robot_turn else 0};")
     for i, obj_loc in zip(range(NUM_OBJS), initial_state.obj_locs):
         print("global o{}: [0..{}] init {};".format(i, TERM_LOC-1, obj_loc))
 
