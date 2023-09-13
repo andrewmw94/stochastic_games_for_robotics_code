@@ -364,9 +364,9 @@ def write_pla_file(game, state_to_int_map, filename):
     with open(filename, "w") as f:
         f.write(str(len(state_to_int_map))+"\n")
         for s, i in state_to_int_map.items():
-            p = 1
+            p = 0
             if not s.robot_turn:
-                p = 2
+                p = 1
             f.write(str(i)+":"+str(p)+"\n")
 
 def write_rew_file(game, state_to_int_map, filename):
