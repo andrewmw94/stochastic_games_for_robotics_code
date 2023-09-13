@@ -36,10 +36,17 @@ RUN  git clone https://github.com/andrewmw94/prism-games.git andrew-prism-games 
     && make -j 4 PPL_DIR=/usr/local/lib
 
 
+# Build My Modified PRISM-games - Up to Date with PRISM Game - 09/12/23
+RUN  git clone https://github.com/MuvvalaKaran/prism-games-experimental.git karan-prism-games \
+    && cd karan-prism-games/prism \
+    && git checkout feature/explicit_smg_loading \
+    && make -j 4 PPL_DIR=/usr/local/lib
+
+
 # Add PRISM Benchmarks to the docker file
 RUN git clone https://github.com/prismmodelchecker/prism-benchmarks.git
 
-# BUild prism
+# Build prism
 RUN git clone https://github.com/prismmodelchecker/prism.git \
     && cd prism/prism \
     && make -j 4
@@ -54,6 +61,10 @@ RUN ln -s /prism/prism/bin/xprism /usr/local/bin/xprism
 RUN git clone https://github.com/andrewmw94/stochastic_games_for_robotics_code.git
 
 WORKDIR /stochastic_games_for_robotics_code
+
+RUN pip3 install numpy matplotlib
+
+RUN apt -y install pypy3
 
 ADD ../ ./
 

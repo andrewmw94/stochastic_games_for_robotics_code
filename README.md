@@ -26,6 +26,14 @@ docker run -it --name <docker_container_name> <docker_image_name>
 
 ```
 
+The combined command looks like this
+
+```bash
+docker run -it -v $PWD:/stochastic_games_robotics_code --name sg_hri_faster_code faster_sg_hri_icra24_code
+```
+
+Here `$PWD` is the local directory you want to volume bind to `/stochastic_games_robotics_code` Directory inside the container. 
+
 If you are more used to GUI and would like to edit or attach a container instance to the VSCode ([Link](https://code.visualstudio.com/docs/devcontainers/containers)) then follow the instructions below:
 
 
