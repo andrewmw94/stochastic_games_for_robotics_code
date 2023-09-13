@@ -33,6 +33,7 @@ RUN git clone https://github.com/prismmodelchecker/prism-games.git \
 # Build Andrew's Modified PRISM-games
 RUN  git clone https://github.com/andrewmw94/prism-games.git andrew-prism-games \
     && cd andrew-prism-games/prism \
+    && git checkout d5e2d0608699d2aba01fae29f664adcdcaf0cc30 \
     && make -j 4 PPL_DIR=/usr/local/lib
 
 
@@ -62,7 +63,7 @@ RUN git clone https://github.com/andrewmw94/stochastic_games_for_robotics_code.g
 
 WORKDIR /stochastic_games_for_robotics_code
 
-RUN pip3 install numpy matplotlib
+RUN pip3 install numpy matplotlib pandas
 
 RUN apt -y install pypy3
 
