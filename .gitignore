@@ -11,3 +11,26 @@ cleaning_room_human_prob_term/models/5_obj_envs/
 
 # ignore my benchmarking dump yard
 preliminary_benchmarking_results/
+
+# ignore all .tra .sta .pla .rew .lab files
+*.pla
+*.sta
+*.rew
+*.tra
+*.lab
+
+# ignore props too
+*.props
+
+# igrnoe prism model files
+*.prism
+
+# ignore zip files
+*.zip
+
+# ignore logs 
+*.log
+
+# ignore random txt, csv files
+*.txt
+*.csv
