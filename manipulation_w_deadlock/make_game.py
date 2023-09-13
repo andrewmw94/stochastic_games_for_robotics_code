@@ -1,4 +1,7 @@
 from enum import Enum
+import time
+
+start = time.time()
 
 CONCURRENT_GAME = False
 NUM_LOCS = 5
@@ -166,7 +169,10 @@ def genNeighbors(state):
                     # if there is a small object in hand then add transition to terminal state
                     if (0 in s_prime.obj_locs and s_prime.obj_locs.index(0) < SMALL_OBJ):
                         s_prime2 = State()
-                        s_prime2.robot_loc = TERM_LOC
+                        # irrecoverable state - locked and robot goes to terminal states
+                        # s_prime2.robot_loc = TERM_LOC
+                        # recoverable state - robot can try again
+                        s_prime2.robot_loc = state.robot_loc
                         s_prime2.human_loc = state.human_loc
                         s_prime2.obj_locs = state.obj_locs.copy()
                         s_prime2.robot_turn = not state.robot_turn
@@ -257,14 +263,15 @@ def genNeighbors(state):
                 ret.append(s_prime)
                 state.neighbors.append(s_prime)
                 if state.robot_turn:
-                    s_prime2=State()
-                    s_prime2.robot_loc=state.robot_loc
-                    s_prime2.human_loc=state.human_loc
-                    s_prime2.obj_locs = state.obj_locs.copy()
-                    s_prime2.robot_turn = not state.robot_turn
-                    ret.append(s_prime2)
-                    state.neighbors.append(s_prime2)
-                    state.transitions.append(Transition([(s_prime, 0.9), (s_prime2, 0.1)]))
+                    # s_prime2=State()
+                    # s_prime2.robot_loc=state.robot_loc
+                    # s_prime2.human_loc=state.human_loc
+                    # s_prime2.obj_locs = state.obj_locs.copy()
+                    # s_prime2.robot_turn = not state.robot_turn
+                    # ret.append(s_prime2)
+                    # state.neighbors.append(s_prime2)
+                    # state.transitions.append(Transition([(s_prime, 0.9), (s_prime2, 0.1)]))
+                    state.transitions.append(Transition([(s_prime, 1)]))
                     state.transitions[-1].action=f"robotgrasp_{i}"
                 else:
                     # state.transitions.append(Transition([(s_prime,1-HUMAN_TERM_PROB)]))
@@ -293,7 +300,7 @@ def genNeighbors(state):
         ret.append(s_prime)
         state.neighbors.append(s_prime)
         if state.robot_turn:
-            state.transitions.append(Transition([(s_prime,1)]))
+            state.transitions.append(Transition([(s_prime, 1)]))
             state.transitions[-1].action="robotplace"
         else:
             s_prime2=State()
@@ -389,13 +396,11 @@ def print_front_matter():
     for obj in range(NUM_OBJS):
         human_grasps = human_grasps + f"[humangrasp_{obj}], "
 
-    # print("  robot, [robotnoop], [robotmotion], [robotplace], [robotgrasp], [robottermselfloop]")
     print("  robot, [robotnoop], [robotplace], [robottermselfloop], " + robot_grasps[:-2] + ", " + robot_moves[:-2])
     print("endplayer")
 
     print("player h1")
     print("  human, [humannoop], [humanplace], [humantermselfloop], " + human_grasps[:-2] + ", " + human_moves[:-2])
-    # print("  human, [humannoop], [humanmotion], [humanplace], [humangrasp], [humantermselfloop]")
     print("endplayer")
 
 
@@ -422,23 +427,13 @@ def print_human_module(game, state_to_int_map):
                 print("    [{}] ".format(t.action)+s.toPrismStr(False)+" -> "+string[:-2]+";")
     print("endmodule")
 
-def print_labels():
-    print("label \"goalterm\" = (rloc={}) & (hloc={});".format(TERM_LOC,TERM_LOC))
-    goal_string = ""
-    for i in range(NUM_OBJS):
-        goal_string += "(o{}={}) &".format(i, i+2)
-    print("label \"goalcleaned\" = "+goal_string[:-2]+";")
 
 def print_rewards():
     print("rewards")
     print("    true : 1;")
     print("endrewards")
 
-def sat_goal(obj_locs):
-    for i in range(NUM_OBJS):
-        if obj_locs[i] != i+2:
-            return False
-    return True
+
 
 def write_tra_file(game, state_to_int_map, og_state_to_int_map, int_to_state_map, num_choices, num_transitions, filename):
     with open(filename, "w") as f:
@@ -469,7 +464,9 @@ def write_lab_file(game, state_to_int_map, filename):
                 my_str=my_str+" 1"
             if s.robot_loc == TERM_LOC and s.human_loc == TERM_LOC:
                 my_str=my_str+" 2"
-            if sat_goal(s.obj_locs):
+            # if sat_goal(s.obj_locs):
+            #     my_str=my_str+" 3"
+            if sat_goal_disjunction(s.obj_locs):
                 my_str=my_str+" 3"
             if len(my_str) > 0:
                 f.write(str(i)+":"+my_str+"\n")
@@ -479,9 +476,9 @@ def write_pla_file(game, state_to_int_map, filename):
     with open(filename, "w") as f:
         f.write(str(len(state_to_int_map))+"\n")
         for s, i in state_to_int_map.items():
-            p = 1
+            p = 0
             if not s.robot_turn:
-                p = 2
+                p = 1
             f.write(str(i)+":"+str(p)+"\n")
 
 def write_rew_file(game, state_to_int_map, filename):
@@ -492,20 +489,45 @@ def write_rew_file(game, state_to_int_map, filename):
 
 
 initial_state=State()
-initial_state.robot_loc = 2
+initial_state.robot_loc = 3
 initial_state.human_loc = 2
 # initial_state.obj_locs=[2]*NUM_OBJS
-initial_state.obj_locs=[2, 3]
+initial_state.obj_locs=[4, 2]
 initial_state.robot_turn = True
 
 
 def print_global_vars():
-    print("global rloc: [2..{}] init 2;".format(NUM_LOCS-1))
-    print("global hloc: [2..{}] init 2;".format(NUM_LOCS-1))
+    print("global rloc: [2..{}] init {};".format(NUM_LOCS-1, initial_state.robot_loc))
+    print("global hloc: [2..{}] init {};".format(NUM_LOCS-1, initial_state.human_loc))
     if not CONCURRENT_GAME:
         print(f"global rturn: [0..1] init {1 if initial_state.robot_turn else 0};")
     for i, obj_loc in zip(range(NUM_OBJS), initial_state.obj_locs):
         print("global o{}: [0..{}] init {};".format(i, TERM_LOC-1, obj_loc))
+
+# obj locs for objects indexed
+GOAL_CONDITION = [5, 3]
+
+# For andrew's code
+def sat_goal(obj_locs):
+    for obj_id, desired_obj_loc in zip(range(NUM_OBJS), GOAL_CONDITION):
+        if obj_locs[obj_id] != desired_obj_loc:
+            return False
+    return True
+
+### Disjunction Formula. Either bject can be in its desired loc
+def sat_goal_disjunction(obj_locs):
+    for obj_id, desired_obj_loc in zip(range(NUM_OBJS), GOAL_CONDITION):
+        if obj_locs[obj_id] == desired_obj_loc:
+            return True
+    return False
+
+# For prismgames code
+def print_labels():
+    print("label \"goalterm\" = (rloc={}) & (hloc={});".format(TERM_LOC,TERM_LOC))
+    goal_string = ""
+    for obj_id, obj_loc_desired in zip(range(NUM_OBJS), GOAL_CONDITION):
+        goal_string += "(o{}={}) &".format(obj_id, obj_loc_desired)
+    print("label \"goalcleaned\" = "+goal_string[:-2]+";")
 
 game = genGame(initial_state)
 
@@ -528,6 +550,7 @@ for s in game:
         #     for s_prime, p in t.prob_distr:
         #         num_prism_transitions+=1
 
+file_string = "_2_obj_10_loc"
 
 if(IMPORTABLE):
     #TODO: why does this need to be here?????
@@ -550,3 +573,7 @@ else:
     print_human_module(game, state_to_int_map)
     print_labels()
     print_rewards()
+
+
+stop = time.time()
+print(f"Time for build the model files: {stop - start:.3f} seconds")
