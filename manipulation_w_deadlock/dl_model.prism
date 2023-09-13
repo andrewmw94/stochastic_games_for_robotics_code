@@ -7,7 +7,7 @@ player h1
 endplayer
 global rloc: [2..4] init 2;
 global hloc: [2..4] init 2;
-global rturn: [0..1] init 1;
+global rturn: [0..1] init 0;
 global o0: [0..3] init 2;
 global o1: [0..3] init 3;
 module robot

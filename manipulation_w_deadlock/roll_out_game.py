@@ -6,8 +6,8 @@ import numpy as np
 
 DEBUG = True
 COOP_STR = False
-ADV_STR = False
-MIN_ACTION = True
+ADV_STR = True
+MIN_ACTION = False
 only_print_desired_actions = True
 
 ROBOT_GRIPPER = 0
@@ -18,14 +18,25 @@ PROB_TERM = True
 ADD_HUMAN_STOCHASTICITY = True
 
 
-# Command: prism-games dl_model.prism spec.props -exportstrat strt.txt -exportstates states.txt
+# Org Prim Command: prism-games dl_model.prism spec.props -exportstrat strt.txt -exportstates states.txt
+# Modified Prim Command: /karan-prism-games/prism/bin/prism -importtrans model.tra -importstates model.sta -importplayers model.pla -importlabels model.lab -importstaterewards model.rew -smg -explicit -javamaxmem 10g spec.props
+# for dumping add -exportstrat strt.txt -exportstates states.txt
+
+ABS_PATH = "/stochastic_games_for_robotics_code/manipulation_w_deadlock/"
 
 if DEBUG and COOP_STR:
     str_file_name = "manipulation_w_deadlock/coop_strt.txt"
     state_file_name = "manipulation_w_deadlock/states.txt"
 elif DEBUG and ADV_STR:
-    str_file_name = "manipulation_w_deadlock/adv_strt.txt"
-    state_file_name = "manipulation_w_deadlock/states.txt"
+    # str_file_name = "manipulation_w_deadlock/adv_strat.txt"
+    # state_file_name = "manipulation_w_deadlock/adv_states.txt"
+
+    str_file_name = ABS_PATH + "adv_strat.txt"
+    state_file_name = ABS_PATH +  "adv_states.txt"
+
+    # debugging 2 obj 10 loc
+    # str_file_name = "manipulation_w_deadlock/adv_strt_2_obj_10_loc_andrew.txt"
+    # state_file_name = "manipulation_w_deadlock/adv_strt_2_obj_10_loc_states_andrew.txt"
 elif DEBUG and MIN_ACTION:
     str_file_name = "manipulation_w_deadlock/min_action_strt.txt"
     state_file_name = "manipulation_w_deadlock/min_action_states.txt"
@@ -77,9 +88,14 @@ with open(str_file_name) as adv_file:
 
 
 # roll out the game
-state = "(2,2,1,2,3)"
-goalstate = '(4,4,1,2,3)'
-TERM_LOC = '4'
+TERM_LOC = '6'
+state = "(3,2,1,4,2)"
+goalstate = f'({TERM_LOC},{TERM_LOC},1,5,3)'
+
+
+# obj locs for objects indexed
+GOAL_CONDITION = [5, 3]
+
 done = False
 rturn = True
 
@@ -87,7 +103,8 @@ while not done:
     strategy = adv_str.get(state, None)
 
     # update the state and chekc if you are done
-    if strategy == 'null' or isinstance(strategy, type(None)) or state == goalstate:
+    # if strategy == 'null' or isinstance(strategy, type(None)) or state == goalstate:
+    if strategy == 'null' or isinstance(strategy, type(None)):
         done = True
         break
 
@@ -99,6 +116,8 @@ while not done:
     if not rturn and ADD_HUMAN_STOCHASTICITY and 0.6 < np.random.normal():
         # roll a dice and 
         strategy = "humanchooseterm"
+    # if not rturn:
+    #     strategy = input("Enter Human action:")
     
     print(f"{state} -> {strategy}")
 
@@ -148,7 +167,7 @@ while not done:
     elif "selfloop" in strategy_str[0]:
         if "human" in strategy_str[0]:
             # if human has object in hand then return it loc 2. <- hardcoded in the abstraction file.
-            if '1' in state_list:
+            if '1' in state_list or '1)' in state_list:
                 # find the obj index and update its location
                 try:
                     obj_idx = state_list.index('1')
@@ -169,4 +188,7 @@ while not done:
 
     state = ",".join(state_list)
     rturn = not rturn
+
+    if int(state_list[3]) == GOAL_CONDITION[0] or int(state_list[3]) == GOAL_CONDITION[1]:
+        done = True
 
