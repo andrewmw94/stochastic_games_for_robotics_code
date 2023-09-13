@@ -1,9 +1,9 @@
 CONCURRENT_GAME = False
-NUM_LOCS = 8
+NUM_LOCS = 4
 ROBOT_GRIPPER = 0
 HUMAN_GRIPPER = 1
 TERM_LOC = NUM_LOCS-1
-NUM_OBJS = 3
+NUM_OBJS = 1
 
 class Transition:
     action=""
@@ -201,17 +201,17 @@ def genNeighbors(state):
             state.transitions[-1].action="robotplace"
         else:
             state.transitions[-1].action="humanplace"
-#Also allow the human to move again
-            s_prime2=State()
-            s_prime2.robot_loc=state.robot_loc
-            s_prime2.human_loc=state.human_loc
-            s_prime2.obj_locs = state.obj_locs.copy()
-            s_prime2.obj_locs[grasped_index] = state.human_loc
-            s_prime2.robot_turn = state.robot_turn
-            ret.append(s_prime2)
-            state.neighbors.append(s_prime2)
-            state.transitions.append(Transition([(s_prime2,1)]))
-            state.transitions[-1].action="humanplaceAndCont"
+            # #Also allow the human to move again
+            # s_prime2=State()
+            # s_prime2.robot_loc=state.robot_loc
+            # s_prime2.human_loc=state.human_loc
+            # s_prime2.obj_locs = state.obj_locs.copy()
+            # s_prime2.obj_locs[grasped_index] = state.human_loc
+            # s_prime2.robot_turn = state.robot_turn
+            # ret.append(s_prime2)
+            # state.neighbors.append(s_prime2)
+            # state.transitions.append(Transition([(s_prime2,1)]))
+            # state.transitions[-1].action="humanplaceAndCont"
 
 
 

@@ -4,7 +4,7 @@ import time
 start = time.time()
 
 CONCURRENT_GAME = False
-NUM_LOCS = 5
+NUM_LOCS = 7
 ROBOT_GRIPPER = 0
 HUMAN_GRIPPER = 1
 TERM_LOC = NUM_LOCS-1
@@ -14,8 +14,8 @@ NUM_OBJS = 2
 SMALL_OBJ = 1
 
 
-IMPORTABLE = False
-ROBOT_FAIL_PROB = 0.05  # 5% probaility of failing 
+IMPORTABLE = True
+ROBOT_FAIL_PROB = 0.01  # 5% probaility of failing 
 HUMAN_TERM_PROB = 0.05
 
 
@@ -26,14 +26,16 @@ class HumanIntProb(Enum):
       human intervention probability for farther locs is constants and set to 20%
     """
     L2 = 0.9
-    L3 = 0.2
-    # L4 = 0.9
-    # L5 = 0.9
+    L3 = 0.9
+    L4 = 0.1
+    L5 = 0.1
 
     # # Locs l6, l7, l8, - Human Far region
     # L6 = 0.2
     # L7 = 0.2
     # L8 = 0.2
+    # L9 = 0.2
+    # L10 = 0.2
 
 class Transition:
     action=""

@@ -1,5 +1,9 @@
+import time
+
+start = time.time()
+
 CONCURRENT_GAME = False
-NUM_LOCS = 4
+NUM_LOCS = 6
 ROBOT_GRIPPER = 0
 HUMAN_GRIPPER = 1
 TERM_LOC = NUM_LOCS-1
@@ -268,13 +272,7 @@ def print_front_matter():
     print("  human, [humannoop], [humanmotion], [humanplace], [humangrasp], [humantermselfloop]")
     print("endplayer")
 
-def print_global_vars():
-    print("global rloc: [2..{}] init 2;".format(NUM_LOCS-1))
-    print("global hloc: [2..{}] init 2;".format(NUM_LOCS-1))
-    if not CONCURRENT_GAME:
-        print("global rturn: [0..1] init 0;")
-    for i in range(NUM_OBJS):
-        print("global o{}: [0..{}] init 2;".format(i, TERM_LOC-1))
+
 
 def print_robot_module(game, state_to_int_map):
     print("module robot")
@@ -299,30 +297,13 @@ def print_human_module(game, state_to_int_map):
                 print("    [{}] ".format(t.action)+s.toPrismStr(False)+" -> "+string[:-2]+";")
     print("endmodule")
 
-def print_labels():
-    print("label \"goalterm\" = (rloc={}) & (hloc={});".format(TERM_LOC,TERM_LOC))
-    print("label \"robotterm\" = (rloc={});".format(TERM_LOC))
-    print("label \"humanterm\" = (hloc={});".format(TERM_LOC))
-    goal_string = ""
-    for i in range(NUM_OBJS):
-        goal_string += "(o{}={}) &".format(i, i+2)
-    print("label \"goalcleaned\" = "+goal_string[:-2]+";")
 
 def print_rewards():
     print("rewards")
     print("    true : 1;")
     print("endrewards")
 
-def sat_goal(obj_locs):
-    for obj_to_skip in range(NUM_OBJS):
-        all_but_one_in_place = True
-        for i in range(NUM_OBJS):
-            if i != obj_to_skip and obj_locs[i] != i+2:
-                all_but_one_in_place = False
-                break
-        if all_but_one_in_place:
-            return True
-    return False
+
 
 def write_tra_file(game, state_to_int_map, og_state_to_int_map, int_to_state_map, num_choices, num_transitions, filename):
     with open(filename, "w") as f:
@@ -382,8 +363,56 @@ def write_rew_file(game, state_to_int_map, filename):
 initial_state=State()
 initial_state.robot_loc = 2
 initial_state.human_loc = 2
-initial_state.obj_locs=[2]*NUM_OBJS
+# initial_state.obj_locs=[2]*NUM_OBJS
+initial_state.obj_locs=[4]
 initial_state.robot_turn=False
+
+def print_global_vars():
+    print("global rloc: [2..{}] init {};".format(NUM_LOCS-1, initial_state.robot_loc))
+    print("global hloc: [2..{}] init {};".format(NUM_LOCS-1, initial_state.human_loc))
+    if not CONCURRENT_GAME:
+        print(f"global rturn: [0..1] init {1 if initial_state.robot_turn else 0};")
+    for i, obj_loc in zip(range(NUM_OBJS), initial_state.obj_locs):
+        print("global o{}: [0..{}] init {};".format(i, TERM_LOC-1, obj_loc))
+
+# obj locs for objects indexed
+GOAL_CONDITION = [4]
+
+# All but one objects in their desired location
+def sat_goal_all_but_one(obj_locs):
+    for obj_to_skip in range(NUM_OBJS):
+        all_but_one_in_place = True
+        for i in range(NUM_OBJS):
+            if i != obj_to_skip and obj_locs[i] != i+2:
+                all_but_one_in_place = False
+                break
+        if all_but_one_in_place:
+            return True
+    return False
+
+# All objects in their desired location
+def sat_goal(obj_locs):
+    for obj_id, desired_obj_loc in zip(range(NUM_OBJS), GOAL_CONDITION):
+        if obj_locs[obj_id] != desired_obj_loc:
+            return False
+    return True
+
+### Disjunction Formula. Either bject can be in its desired loc
+def sat_goal_disjunction(obj_locs):
+    for obj_id, desired_obj_loc in zip(range(NUM_OBJS), GOAL_CONDITION):
+        if obj_locs[obj_id] == desired_obj_loc:
+            return True
+    return False
+
+
+def print_labels():
+    print("label \"goalterm\" = (rloc={}) & (hloc={});".format(TERM_LOC,TERM_LOC))
+    print("label \"robotterm\" = (rloc={});".format(TERM_LOC))
+    print("label \"humanterm\" = (hloc={});".format(TERM_LOC))
+    goal_string = ""
+    for obj_id, obj_loc_desired in zip(range(NUM_OBJS), GOAL_CONDITION):
+        goal_string += "(o{}={}) &".format(obj_id, obj_loc_desired)
+    print("label \"goalcleaned\" = "+goal_string[:-2]+";")
 
 game = genGame(initial_state)
 
@@ -423,3 +452,6 @@ else:
     print_human_module(game, state_to_int_map)
     print_labels()
     print_rewards()
+
+stop = time.time()
+print(f"Time for build the model files: {stop - start:.3f} seconds")
