@@ -1,15 +1,17 @@
 import time
 
+PRINT_TIME: bool = False 
+SANITY_CHECK: bool = False
 start = time.time()
 
 CONCURRENT_GAME = False
-NUM_LOCS = 6
+NUM_LOCS = 5
 ROBOT_GRIPPER = 0
 HUMAN_GRIPPER = 1
 TERM_LOC = NUM_LOCS-1
 NUM_OBJS = 1
 
-IMPORTABLE = False
+IMPORTABLE = True
 
 class Transition:
     action=""
@@ -210,19 +212,20 @@ def genNeighbors(state):
         else:
             state.transitions[-1].action="humanplace"
 
-    for n in ret:
-        if state.robot_turn == n.robot_turn:
-            print("ERROR, the turn didn't alternate=================================================================================")
-
-    for n in state.neighbors:
-        if state.robot_turn == n.robot_turn:
-            print("ERROR, the turn didn't alternate=================================================================================")
-
-    for t in state.transitions:
-        for s_prime, prob in t.prob_distr:
-            if state.robot_turn == s_prime.robot_turn:
+    if SANITY_CHECK:
+        for n in ret:
+            if state.robot_turn == n.robot_turn:
                 print("ERROR, the turn didn't alternate=================================================================================")
-                print(len(state.transitions))
+
+        for n in state.neighbors:
+            if state.robot_turn == n.robot_turn:
+                print("ERROR, the turn didn't alternate=================================================================================")
+
+        for t in state.transitions:
+            for s_prime, prob in t.prob_distr:
+                if state.robot_turn == s_prime.robot_turn:
+                    print("ERROR, the turn didn't alternate=================================================================================")
+                    print(len(state.transitions))
 
     return ret
 
@@ -325,7 +328,8 @@ def write_sta_file(game, state_to_int_map, filename):
 
 def write_lab_file(game, state_to_int_map, filename):
     with open(filename, "w") as f:
-        f.write("0=\"init\" 1=\"deadlock\" 2=\"goalterm\" 3=\"robotterm\" 4=\"humanterm\" 5=\"goalcleaned\"\n")
+        # f.write("0=\"init\" 1=\"deadlock\" 2=\"goalterm\" 3=\"robotterm\" 4=\"humanterm\" 5=\"goalcleaned\"\n")
+        f.write("0=\"init\" 1=\"deadlock\" 2=\"goalterm\" 3=\"goalcleaned\"\n")
         for s, i in state_to_int_map.items():
             my_str = ""
             if i == 0:
@@ -334,12 +338,14 @@ def write_lab_file(game, state_to_int_map, filename):
                 my_str=my_str+" 1"
             if s.robot_loc == TERM_LOC and s.human_loc == TERM_LOC:
                 my_str=my_str+" 2"
-            if s.robot_loc == TERM_LOC:
+            # Add this if you want to reason over humand and robot termination individually
+            # if s.robot_loc == TERM_LOC:
+            #     my_str=my_str+" 3"
+            # if s.human_loc == TERM_LOC:
+            #     my_str=my_str+" 4"
+            # if sat_goal(s.obj_locs):
+            if org_sat_goal(s.obj_locs):
                 my_str=my_str+" 3"
-            if s.human_loc == TERM_LOC:
-                my_str=my_str+" 4"
-            if sat_goal(s.obj_locs):
-                my_str=my_str+" 5"
             if len(my_str) > 0:
                 f.write(str(i)+":"+my_str+"\n")
 
@@ -363,9 +369,9 @@ def write_rew_file(game, state_to_int_map, filename):
 initial_state=State()
 initial_state.robot_loc = 2
 initial_state.human_loc = 2
-# initial_state.obj_locs=[2]*NUM_OBJS
-initial_state.obj_locs=[4]
-initial_state.robot_turn=False
+initial_state.obj_locs=[2]*NUM_OBJS
+# initial_state.obj_locs=[4]
+initial_state.robot_turn= True
 
 def print_global_vars():
     print("global rloc: [2..{}] init {};".format(NUM_LOCS-1, initial_state.robot_loc))
@@ -376,7 +382,7 @@ def print_global_vars():
         print("global o{}: [0..{}] init {};".format(i, TERM_LOC-1, obj_loc))
 
 # obj locs for objects indexed
-GOAL_CONDITION = [4]
+GOAL_CONDITION = [i+2 for i in range(NUM_OBJS)]
 
 # All but one objects in their desired location
 def sat_goal_all_but_one(obj_locs):
@@ -405,10 +411,18 @@ def sat_goal_disjunction(obj_locs):
     return False
 
 
+def org_sat_goal(obj_locs):
+    for i in range(NUM_OBJS):
+        if obj_locs[i] != i+2:
+            return False
+    return True
+
+
 def print_labels():
     print("label \"goalterm\" = (rloc={}) & (hloc={});".format(TERM_LOC,TERM_LOC))
-    print("label \"robotterm\" = (rloc={});".format(TERM_LOC))
-    print("label \"humanterm\" = (hloc={});".format(TERM_LOC))
+    # Add this if you want to reason over humand and robot termination individually
+    # print("label \"robotterm\" = (rloc={});".format(TERM_LOC))
+    # print("label \"humanterm\" = (hloc={});".format(TERM_LOC))
     goal_string = ""
     for obj_id, obj_loc_desired in zip(range(NUM_OBJS), GOAL_CONDITION):
         goal_string += "(o{}={}) &".format(obj_id, obj_loc_desired)
@@ -453,5 +467,7 @@ else:
     print_labels()
     print_rewards()
 
-stop = time.time()
-print(f"Time for build the model files: {stop - start:.3f} seconds")
+
+if PRINT_TIME:
+    stop = time.time()
+    print(f"Time for build the model files: {stop - start:.3f} seconds")

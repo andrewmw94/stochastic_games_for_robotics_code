@@ -1,17 +1,20 @@
 import time
 
+PRINT_TIME: bool = False 
+SANITY_CHECK: bool = True 
 start = time.time()
 
 
 CONCURRENT_GAME = False
-NUM_LOCS = 5
+NUM_LOCS = 9
 ROBOT_GRIPPER = 0
 HUMAN_GRIPPER = 1
 TERM_LOC = NUM_LOCS-1
-NUM_OBJS = 1
+NUM_OBJS = 2
 
-IMPORTABLE = False
+IMPORTABLE = True
 HUMAN_TERM_PROB = 0.05
+
 
 class Transition:
     action=""
@@ -220,6 +223,7 @@ def genNeighbors(state):
 
     #placing   
     else:
+
         s_prime=State()
         s_prime.robot_loc=state.robot_loc
         s_prime.human_loc=state.human_loc
@@ -256,20 +260,21 @@ def genNeighbors(state):
     #     ret.append(s_prime)
     #     state.neighbors.append(s_prime)
     #     state.transitions.append(Transition([(s_prime,HUMAN_TERM_PROB)]))
-
-    for n in ret:
-        if state.robot_turn == n.robot_turn:
-            print("ERROR, the turn didn't alternate=================================================================================")
-
-    for n in state.neighbors:
-        if state.robot_turn == n.robot_turn:
-            print("ERROR, the turn didn't alternate=================================================================================")
-
-    for t in state.transitions:
-        for s_prime, prob in t.prob_distr:
-            if state.robot_turn == s_prime.robot_turn:
+    
+    if SANITY_CHECK: 
+        for n in ret:
+            if state.robot_turn == n.robot_turn:
                 print("ERROR, the turn didn't alternate=================================================================================")
-                print(len(state.transitions))
+
+        for n in state.neighbors:
+            if state.robot_turn == n.robot_turn:
+                print("ERROR, the turn didn't alternate=================================================================================")
+
+        for t in state.transitions:
+            for s_prime, prob in t.prob_distr:
+                if state.robot_turn == s_prime.robot_turn:
+                    print("ERROR, the turn didn't alternate=================================================================================")
+                    print(len(state.transitions))
 
     return ret
 
@@ -376,7 +381,7 @@ def write_lab_file(game, state_to_int_map, filename):
                 my_str=my_str+" 1"
             if s.robot_loc == TERM_LOC and s.human_loc == TERM_LOC:
                 my_str=my_str+" 2"
-            if sat_goal(s.obj_locs):
+            if org_sat_goal(s.obj_locs):
                 my_str=my_str+" 3"
             if len(my_str) > 0:
                 f.write(str(i)+":"+my_str+"\n")
@@ -401,8 +406,8 @@ def write_rew_file(game, state_to_int_map, filename):
 initial_state=State()
 initial_state.robot_loc = 2
 initial_state.human_loc = 2
-# initial_state.obj_locs=[2]*NUM_OBJS
-initial_state.obj_locs=[2]
+initial_state.obj_locs=[2]*NUM_OBJS
+# initial_state.obj_locs=[2]
 initial_state.robot_turn=True
 
 def print_global_vars():
@@ -414,7 +419,16 @@ def print_global_vars():
         print("global o{}: [0..{}] init {};".format(i, TERM_LOC-1, obj_loc))
 
 # obj locs for objects indexed
-GOAL_CONDITION = [3]
+# GOAL_CONDITION = [3]
+
+# # standard pick and place
+# GOAL_CONDITION = [2]*NUM_OBJS
+
+def org_sat_goal(obj_locs):
+    for i in range(NUM_OBJS):
+        if obj_locs[i] != i+2:
+            return False
+    return True
 
 def sat_goal(obj_locs):
     for obj_id, desired_obj_loc in zip(range(NUM_OBJS), GOAL_CONDITION):
@@ -481,6 +495,6 @@ else:
     print_labels()
     print_rewards()
 
-
-stop = time.time()
-print(f"Time for build the model files: {stop - start:.3f} seconds")
+if PRINT_TIME:
+    stop = time.time()
+    print(f"Time for build the model files: {stop - start:.3f} seconds")
