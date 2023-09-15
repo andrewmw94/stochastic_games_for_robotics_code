@@ -422,7 +422,7 @@ def print_global_vars():
 # GOAL_CONDITION = [3]
 
 # # standard pick and place
-# GOAL_CONDITION = [2]*NUM_OBJS
+GOAL_CONDITION = [i+2 for i in range(NUM_OBJS)]*NUM_OBJS
 
 def org_sat_goal(obj_locs):
     for i in range(NUM_OBJS):
