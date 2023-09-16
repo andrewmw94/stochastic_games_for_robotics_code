@@ -51,16 +51,17 @@ function plot_graph_unlimited(obj_locs, construct_data, synth_data, total_time, 
     plot(obj_locs, total_time, '-o', 'LineWidth', line_thick);
     grid on
     xticks(obj_locs)
-    xlabel('Locations', 'FontSize', fontsize)
+%     xlabel('Locations', 'FontSize', fontsize)
     ylabel('Time (s)', 'FontSize', fontsize)
     legend('Model Construction', 'Model Checking', 'Total Time', ...
         'Location', 'northwest')
-    title(title_str)
+    lgd.FontSize = 12;
+%     title(title_str)
     if save_plot == 1
         if  plot_svg == 1
-            saveas(f,[pwd, '/unlimited_human/fixed_obj_vary_loc.svg'])
+            saveas(f,[pwd, '/unlimited_human/fixed_obj_vary_loc_modified.svg'])
         elseif plot_svg == 0
-            saveas(f,[pwd, '/unlimited_human/fixed_obj_vary_loc.png'])
+            saveas(f,[pwd, '/unlimited_human/fixed_obj_vary_loc_modified.png'])
         end
     end
 end
@@ -79,16 +80,18 @@ function plot_graph_prob(obj_locs, construct_data, synth_data, total_time, ...
     plot(obj_locs, total_time, '-o', 'LineWidth', line_thick);
     grid on
     xticks(obj_locs)
-    xlabel('Locations', 'FontSize', fontsize)
+%     xlabel('Locations', 'FontSize', fontsize)
     ylabel('Time (s)', 'FontSize', fontsize)
-    legend('Model Construction', 'Model Checking', 'Total Time', ...
-        'Location', 'northwest')
-    title(title_str)
+    lgd = legend('Model Construction', 'Model Checking', 'Total Time', ...
+        'Location', 'northwest');
+%     fontsize(lgd, 14, 'points');
+    lgd.FontSize = 12;
+%     title(title_str)
     if save_plot == 1
         if  plot_svg == 1
-            saveas(f,[pwd, '/prob_human/fixed_obj_vary_loc.svg'])
+            saveas(f,[pwd, '/prob_human/fixed_obj_vary_loc_modified.svg'])
         elseif plot_svg == 0
-            saveas(f,[pwd, '/prob_human/fixed_obj_vary_loc.png'])
+            saveas(f,[pwd, '/prob_human/fixed_obj_vary_loc_modified.png'])
         end
     end
 end
