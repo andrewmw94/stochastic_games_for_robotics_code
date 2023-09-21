@@ -5,11 +5,11 @@ SANITY_CHECK: bool = False
 start = time.time()
 
 CONCURRENT_GAME = False
-NUM_LOCS = 5
+NUM_LOCS = 7
 ROBOT_GRIPPER = 0
 HUMAN_GRIPPER = 1
 TERM_LOC = NUM_LOCS-1
-NUM_OBJS = 1
+NUM_OBJS = 5
 
 IMPORTABLE = True
 
@@ -343,8 +343,8 @@ def write_lab_file(game, state_to_int_map, filename):
             #     my_str=my_str+" 3"
             # if s.human_loc == TERM_LOC:
             #     my_str=my_str+" 4"
-            # if sat_goal(s.obj_locs):
-            if org_sat_goal(s.obj_locs):
+            if sat_goal(s.obj_locs):
+            # if org_sat_goal(s.obj_locs):
                 my_str=my_str+" 3"
             if len(my_str) > 0:
                 f.write(str(i)+":"+my_str+"\n")
@@ -382,7 +382,8 @@ def print_global_vars():
         print("global o{}: [0..{}] init {};".format(i, TERM_LOC-1, obj_loc))
 
 # obj locs for objects indexed
-GOAL_CONDITION = [i+2 for i in range(NUM_OBJS)]
+# GOAL_CONDITION = [i+2 for i in range(NUM_OBJS)]
+GOAL_CONDITION = [2]*NUM_OBJS
 
 # All but one objects in their desired location
 def sat_goal_all_but_one(obj_locs):

@@ -1,5 +1,0 @@
-// Robot minimizes Human's probability of winning
-//<<1>>Pmin =? [F ("humanwin")];
-
-// Robot maximizes its's own probability of winning
-<<1>> Pmax = ? [F("robotwin")]

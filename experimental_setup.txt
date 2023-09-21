@@ -1,9 +1,0 @@
-Experimental Setup:
-
-Robot Actions: Robot can move ([robotmotion]), grasp ([robotgrasp]), transfer ([robotmotion]), and release ([robotplace]) an object or take no action ([robotnoop])
-Human Actions: Human can perform the same actions as robot does and the naming convention is similar. 
-
-rloc and hloc are physical locations that the robot and human can be at. We preserve 0 and 1 for robot gripper location and human gripper location. We preserve the last location for the terminal state. The rest of the locations are where the objects can be placed. 
-
-Init state: All objects are grounded and stacked at location 2.
-Final state: Both robot and human should be in their terminal state and objects should be in their desired locations.

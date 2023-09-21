@@ -1,5 +1,0 @@
-<<1,2>> Pmax =? [ G !("collision") ]
-
-<<1>> Pmax =? [ G !("collision") ]
-
-<<2>> Pmax =? [ F ("collision") ]
