@@ -1,10 +1,10 @@
 import sys
 import re
 
-DEBUG = False
-MIN_HUMAN_WIN = True
+DEBUG = True
+MIN_HUMAN_WIN = False
 
-ABS_PATH = "/stochastic_games_for_robotics_code/tic_tac_toe/"
+ABS_PATH = "/stochastic_games_for_robotics_code/icra24/tic_tac_toe/"
 
 if DEBUG:
     # adv_file_name = "tic_tac_toe/adv.txt"
@@ -81,16 +81,16 @@ with open(adv_file_name) as adv_file:
 
 
 # roll out the game - Robot turn, and all cells are empty
-state = "(1,0,0,0,0,0,0,0,0,0)"
+curr_state = "(1,0,0,0,0,0,0,0,0,0)"
 # get the initial state value
-prism_state = state_real_to_prism_map[state]
+prism_state = state_real_to_prism_map[curr_state]
 opt_state_val = state_int_to_val[prism_state]
 done = False
 rturn = True
 i = 0 
 
 while not done:
-    strategy = adv_str.get(state, None)
+    strategy = adv_str.get(curr_state, None)
 
     # update the state and chekc if you are done
     if strategy == 'null' or isinstance(strategy, type(None)):
@@ -101,38 +101,49 @@ while not done:
     if not rturn:
         assert 'human' in strategy, "Error rolling out" 
 
-    print(f"{state} -> {strategy}: {opt_state_val}")
+    print(f"{curr_state}; Current State Val: {opt_state_val}  ---> {strategy}")
 
     # The last two element are the row and columtn
     strategy_str = strategy.split("_")
     row_idx = strategy_str[-2]
     col_idx = strategy_str[-1]
     # manually introducing stovhasticity in the first robot move
-    if i == 0:
+    # robot stochasticity
+    if i == 0 and rturn:
         row_idx = col_idx = 0
     
-    # if i == 4:
+    # if i == 4 and rturn:
     #     row_idx = 2
     #     col_idx = 0
+
+    # human stochasticity
+    # if i == 1 and not rturn:clea
+    #     row_idx = int(row_idx) + 1
+    
+    # # human stochasticity
+    # if i == 2 and rturn:
+    #     row_idx = 0
+    #     col_idx = 0
+
 
 
 
     state_tuple_idx = 3 * int(row_idx) + (int(col_idx) + 1)
 
     # update turn
-    state_list = state.split(',') 
+    state_list = curr_state.split(',') 
     state_list[0] = '(0' if rturn else '(1'
     state_list[state_tuple_idx] = '1' if rturn else '2'
 
     if ')' in state_list[-1]:
-        state = ",".join(state_list)
+        nxt_state = ",".join(state_list)
     else:
-        state = ",".join(state_list)
-        state += ')'
+        nxt_state = ",".join(state_list)
+        nxt_state += ')'
 
     rturn = not rturn
-
-    prism_state = state_real_to_prism_map[state]
+    curr_state = nxt_state
+    prism_state = state_real_to_prism_map[curr_state]
     opt_state_val = state_int_to_val[prism_state]
 
     # update counter

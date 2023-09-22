@@ -22,17 +22,19 @@ ADD_HUMAN_STOCHASTICITY = True
 # Modified Prim Command: /karan-prism-games/prism/bin/prism -importtrans model.tra -importstates model.sta -importplayers model.pla -importlabels model.lab -importstaterewards model.rew -smg -explicit -javamaxmem 10g spec.props
 # for dumping add -exportstrat strt.txt -exportstates states.txt
 
-ABS_PATH = "/stochastic_games_for_robotics_code/manipulation_w_deadlock/"
+ABS_PATH = "/stochastic_games_for_robotics_code/icra24/manipulation_w_deadlock/"
 
 if DEBUG and COOP_STR:
     str_file_name = "manipulation_w_deadlock/coop_strt.txt"
     state_file_name = "manipulation_w_deadlock/states.txt"
+    state_vals_file_name = ''
 elif DEBUG and ADV_STR:
     # str_file_name = "manipulation_w_deadlock/adv_strat.txt"
     # state_file_name = "manipulation_w_deadlock/adv_states.txt"
 
     str_file_name = ABS_PATH + "adv_strat.txt"
     state_file_name = ABS_PATH +  "adv_states.txt"
+    state_vals_file_name = ''
 
     # debugging 2 obj 10 loc
     # str_file_name = "manipulation_w_deadlock/adv_strt_2_obj_10_loc_andrew.txt"
@@ -40,9 +42,11 @@ elif DEBUG and ADV_STR:
 elif DEBUG and MIN_ACTION:
     str_file_name = "manipulation_w_deadlock/min_action_strt.txt"
     state_file_name = "manipulation_w_deadlock/min_action_states.txt"
+    state_vals_file_name = ''
 else:
     adv_file_name = "str.txt"
     state_file_name = "states.txt"
+    state_vals_file_name = ''
 
 state_prism_to_real_map={}
 state_real_to_prism_map={}
@@ -66,6 +70,18 @@ with open(state_file_name) as state_file:
         line = state_file.readline()
 
     # print(state_prism_to_real_map)
+
+state_int_to_val = {}
+line_count = 0
+with open(state_vals_file_name) as state_file:
+    line = state_file.readline()
+    while line:
+        line = line.strip()
+        state_int_to_val[line_count] = float(line)
+        # keep reading until you terminate
+        line = state_file.readline()
+        line_count += 1
+
 
 adv_str = {}
 with open(str_file_name) as adv_file:
